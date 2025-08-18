@@ -1,0 +1,196 @@
+<!DOCTYPE html><html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SRC MATHARI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .hidden { display: none; }
+  </style>
+</head>
+<body class="bg-white text-gray-900">
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-red-600 to-white text-center py-4 shadow-md">
+    <h1 class="text-2xl font-bold text-white drop-shadow">SRC MATHARI</h1>
+  </header>  <!-- Menu -->  <div class="p-4 space-y-4">
+    <button onclick="showAddForm()" class="w-full bg-red-500 text-white py-2 rounded-lg">➕ Tambah Barang</button>
+    <button onclick="showKosong()" class="w-full bg-gray-800 text-white py-2 rounded-lg">📦 Barang Kosong</button>
+  </div>  <!-- Kategori + Barang -->  <div id="kategoriList" class="p-4 space-y-2"></div>  <!-- Form Tambah Barang -->  <div id="formTambah" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white p-4 rounded-lg w-80">
+      <h2 class="font-bold mb-2">Tambah Barang</h2>
+      <input id="namaBarang" placeholder="Nama Barang" class="border w-full mb-2 p-2 rounded">
+      <input id="kategoriBarang" placeholder="Kategori" class="border w-full mb-2 p-2 rounded">
+      <input id="stokBarang" type="number" placeholder="Stok" class="border w-full mb-2 p-2 rounded">
+      <input id="gambarBarang" type="file" accept="image/*" class="border w-full mb-2 p-2 rounded">
+      <div class="flex justify-between">
+        <button onclick="simpanBarang()" class="bg-red-500 text-white px-3 py-1 rounded">Simpan</button>
+        <button onclick="tutupForm()" class="bg-gray-400 px-3 py-1 rounded">Batal</button>
+      </div>
+    </div>
+  </div>  <!-- Popup Aksi Barang -->  <div id="popupAksi" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white p-4 rounded-lg w-80 text-center">
+      <h2 id="popupNama" class="font-bold mb-2"></h2>
+      <img id="popupGambar" class="mx-auto mb-2 w-20 h-20 object-cover rounded">
+      <p id="popupStok" class="mb-2"></p>
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="barangMasuk()" class="bg-green-500 text-white py-1 rounded">Masuk</button>
+        <button onclick="barangKeluar()" class="bg-yellow-500 text-white py-1 rounded">Keluar</button>
+        <button onclick="editBarang()" class="bg-blue-500 text-white py-1 rounded">Edit</button>
+        <button onclick="hapusBarang()" class="bg-red-600 text-white py-1 rounded">Hapus</button>
+      </div>
+      <button onclick="tutupPopup()" class="mt-3 bg-gray-400 px-3 py-1 rounded">Tutup</button>
+    </div>
+  </div>  <!-- Barang Kosong -->  <div id="halamanKosong" class="hidden p-4">
+    <h2 class="font-bold mb-3">Barang Kosong</h2>
+    <ul id="listKosong" class="space-y-2"></ul>
+    <button onclick="tutupKosong()" class="bg-gray-400 px-3 py-1 rounded">Kembali</button>
+  </div><script>
+  let barangList = JSON.parse(localStorage.getItem('barangList')) || [];
+  let selectedBarang = null;
+
+  function renderKategori() {
+    const container = document.getElementById('kategoriList');
+    container.innerHTML = '';
+
+    const kategoriUnik = [...new Set(barangList.map(b => b.kategori))];
+    kategoriUnik.forEach(kat => {
+      const div = document.createElement('div');
+      div.className = 'border rounded-lg';
+
+      const header = document.createElement('div');
+      header.className = 'bg-red-100 px-4 py-2 font-bold cursor-pointer';
+      header.innerText = kat;
+      header.onclick = () => toggleKategori(kat);
+      div.appendChild(header);
+
+      const list = document.createElement('div');
+      list.id = 'list-' + kat;
+      list.className = 'hidden p-2 space-y-2';
+
+      barangList.filter(b => b.kategori === kat).forEach(b => {
+        const item = document.createElement('div');
+        item.className = 'flex items-center justify-between border p-2 rounded';
+        item.onclick = () => bukaPopup(b);
+
+        const kiri = document.createElement('div');
+        kiri.className = 'flex items-center gap-2';
+
+        const img = document.createElement('img');
+        img.src = b.gambar;
+        img.className = 'w-10 h-10 object-cover rounded';
+        kiri.appendChild(img);
+
+        const nama = document.createElement('span');
+        nama.innerText = `${b.nama} [${b.stok}]`;
+        kiri.appendChild(nama);
+
+        item.appendChild(kiri);
+        list.appendChild(item);
+      });
+
+      div.appendChild(list);
+      container.appendChild(div);
+    });
+  }
+
+  function toggleKategori(kat) {
+    const list = document.getElementById('list-' + kat);
+    list.classList.toggle('hidden');
+  }
+
+  function showAddForm() { document.getElementById('formTambah').classList.remove('hidden'); }
+  function tutupForm() { document.getElementById('formTambah').classList.add('hidden'); }
+
+  function simpanBarang() {
+    const nama = document.getElementById('namaBarang').value;
+    const kategori = document.getElementById('kategoriBarang').value;
+    const stok = parseInt(document.getElementById('stokBarang').value) || 0;
+    const file = document.getElementById('gambarBarang').files[0];
+
+    if (!nama || !kategori) return alert('Lengkapi data!');
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      barangList.push({ nama, kategori, stok, gambar: e.target.result });
+      localStorage.setItem('barangList', JSON.stringify(barangList));
+      renderKategori();
+      tutupForm();
+    };
+    if (file) reader.readAsDataURL(file); else {
+      barangList.push({ nama, kategori, stok, gambar: '' });
+      localStorage.setItem('barangList', JSON.stringify(barangList));
+      renderKategori();
+      tutupForm();
+    }
+  }
+
+  function bukaPopup(barang) {
+    selectedBarang = barang;
+    document.getElementById('popupNama').innerText = barang.nama;
+    document.getElementById('popupStok').innerText = `Stok: ${barang.stok}`;
+    document.getElementById('popupGambar').src = barang.gambar;
+    document.getElementById('popupAksi').classList.remove('hidden');
+  }
+
+  function tutupPopup() { document.getElementById('popupAksi').classList.add('hidden'); }
+
+  function barangMasuk() {
+    selectedBarang.stok++;
+    updateBarang();
+  }
+
+  function barangKeluar() {
+    if (selectedBarang.stok > 0) selectedBarang.stok--;
+    updateBarang();
+  }
+
+  function editBarang() {
+    const namaBaru = prompt('Nama baru:', selectedBarang.nama);
+    if (namaBaru) selectedBarang.nama = namaBaru;
+    const stokBaru = prompt('Stok baru:', selectedBarang.stok);
+    if (stokBaru !== null) selectedBarang.stok = parseInt(stokBaru);
+    updateBarang();
+  }
+
+  function hapusBarang() {
+    if (confirm('Hapus barang ini?')) {
+      barangList = barangList.filter(b => b !== selectedBarang);
+      localStorage.setItem('barangList', JSON.stringify(barangList));
+      renderKategori();
+      tutupPopup();
+    }
+  }
+
+  function updateBarang() {
+    localStorage.setItem('barangList', JSON.stringify(barangList));
+    renderKategori();
+    tutupPopup();
+  }
+
+  function showKosong() {
+    document.getElementById('halamanKosong').classList.remove('hidden');
+    document.getElementById('kategoriList').classList.add('hidden');
+
+    const listKosong = document.getElementById('listKosong');
+    listKosong.innerHTML = '';
+    barangList.filter(b => b.stok === 0).forEach(b => {
+      const li = document.createElement('li');
+      li.className = 'flex justify-between items-center border p-2 rounded';
+      li.innerHTML = `${b.nama} <button onclick="shareWA('${b.nama}')" class="bg-green-500 text-white px-2 py-1 rounded">WA</button>`;
+      listKosong.appendChild(li);
+    });
+  }
+
+  function tutupKosong() {
+    document.getElementById('halamanKosong').classList.add('hidden');
+    document.getElementById('kategoriList').classList.remove('hidden');
+  }
+
+  function shareWA(nama) {
+    const url = `https://wa.me/?text=Order%20${encodeURIComponent(nama)}`;
+    window.open(url, '_blank');
+  }
+
+  renderKategori();
+</script></body>
+</html>
