@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SRC MATHARI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .hidden { display: none; }
+  </style>
+</head>
+<body class="bg-white text-gray-900">
+
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-red-600 to-white py-4 shadow-md relative flex justify-between items-center px-4">
+    <h1 class="text-2xl font-bold text-white drop-shadow">SRC MATHARI</h1>
+    <button id="btnAuth" class="bg-yellow-400 px-3 py-1 rounded cursor-pointer z-50">
+      Sign In
+    </button>
+  </header>
+
+  <!-- Menu -->
+  <div class="p-4 space-y-4">
+    <button onclick="showAddForm()" class="w-full bg-red-500 text-white py-2 rounded-lg">➕ Tambah Barang</button>
+    <button onclick="showKosong()" class="w-full bg-gray-800 text-white py-2 rounded-lg">📦 Barang Kosong</button>
+    <button onclick="showCart()" class="w-full bg-green-600 text-white py-2 rounded-lg">🛒 Keranjang</button>
+  </div>
+
+  <!-- Kategori + Barang -->
+  <div id="kategoriList" class="p-4 space-y-2"></div>
+
+  <!-- Form Tambah Barang -->
+  <div id="formTambah" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
+    <div class="bg-white p-4 rounded-lg w-80">
+      <h2 class="font-bold mb-2">Tambah Barang</h2>
+      <input id="namaBarang" placeholder="Nama Barang" class="border w-full mb-2 p-2 rounded">
+      <input id="kategoriBarang" placeholder="Kategori" class="border w-full mb-2 p-2 rounded">
+      <input id="stokBarang" type="number" placeholder="Stok" class="border w-full mb-2 p-2 rounded">
+      <label class="text-sm">Foto dari Kamera:</label>
+      <input id="gambarBarangKamera" type="file" accept="image/*" capture="environment" class="border w-full mb-2 p-2 rounded">
+      <label class="text-sm">Upload dari File/Galeri:</label>
+      <input id="gambarBarangFile" type="file" accept="image/*" class="border w-full mb-2 p-2 rounded">
+      <div class="flex justify-between">
+        <button onclick="simpanBarang()" class="bg-red-500 text-white px-3 py-1 rounded">Simpan</button>
+        <button onclick="tutupForm()" class="bg-gray-400 px-3 py-1 rounded">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup Sign In -->
+  <div id="popupSignIn" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-4 rounded-lg w-80">
+      <h2 class="font-bold mb-2">Sign In</h2>
+      <input id="userWA" placeholder="Nomor WA / Username" class="border w-full mb-2 p-2 rounded">
+      <input id="userPIN" type="password" placeholder="PIN" class="border w-full mb-2 p-2 rounded">
+      <div class="flex justify-between">
+        <button onclick="doSignIn()" class="bg-green-500 text-white px-3 py-1 rounded">Masuk</button>
+        <button onclick="tutupSignIn()" class="bg-gray-400 px-3 py-1 rounded">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Keranjang -->
+  <div id="halamanCart" class="hidden p-4">
+    <h2 class="font-bold mb-3">Keranjang</h2>
+    <ul id="listCart" class="space-y-2"></ul>
+    <div class="flex justify-between items-center mt-4">
+      <button onclick="checkoutCart()" class="bg-green-600 text-white px-4 py-2 rounded">Checkout</button>
+      <button onclick="tutupCart()" class="bg-gray-400 px-3 py-2 rounded">Kembali</button>
+    </div>
+  </div>
+
+  <!-- Barang Kosong -->
+  <div id="halamanKosong" class="hidden p-4">
+    <h2 class="font-bold mb-3">Barang Kosong</h2>
+    <ul id="listKosong" class="space-y-2"></ul>
+    <button onclick="tutupKosong()" class="bg-gray-400 px-3 py-1 rounded">Kembali</button>
+  </div>
+
+<script>
+  let barangList = JSON.parse(localStorage.getItem('barangList')) || [];
+  let cartList = JSON.parse(localStorage.getItem('cartList')) || [];
+  let loggedIn = localStorage.getItem("loggedIn") === "true";
+
+  const btnAuth = document.getElementById("btnAuth");
+
+  // --- Helper Resize Gambar ---
+  function resizeImage(file, callback) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const MAX_SIZE = 400;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height *= MAX_SIZE / width;
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width *= MAX_SIZE / height;
+            height = MAX_SIZE;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+        callback(canvas.toDataURL("image/jpeg", 0.7));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // --- Auth ---
+  function updateAuthButton() {
+    btnAuth.innerText = loggedIn ? "Logout" : "Sign In";
+  }
+
+  btnAuth.addEventListener("click", () => {
+    if (loggedIn) {
+      // Logout
+      loggedIn = false;
+      localStorage.setItem("loggedIn", "false");
+      alert("Anda sudah logout!");
+      updateAuthButton();
+    } else {
+      // Sign In
+      showSignIn();
+    }
+  });
+
+  function showSignIn() { document.getElementById("popupSignIn").classList.remove("hidden"); }
+  function tutupSignIn() { document.getElementById("popupSignIn").classList.add("hidden"); }
+  function doSignIn() {
+    const wa = document.getElementById("userWA").value;
+    const pin = document.getElementById("userPIN").value;
+    if (!wa || !pin) return alert("Isi data dengan benar!");
+    loggedIn = true;
+    localStorage.setItem("loggedIn", "true");
+    tutupSignIn();
+    updateAuthButton();
+    alert("Login berhasil!");
+  }
+
+  // --- Render Kategori ---
+  function renderKategori() {
+    const container = document.getElementById('kategoriList');
+    container.innerHTML = '';
+    const kategoriUnik = [...new Set(barangList.map(b => b.kategori))];
+    kategoriUnik.forEach(kat => {
+      const div = document.createElement('div');
+      div.className = 'border rounded-lg';
+      const header = document.createElement('div');
+      header.className = 'bg-red-100 px-4 py-2 font-bold cursor-pointer';
+      header.innerText = kat;
+      header.onclick = () => toggleKategori(kat);
+      div.appendChild(header);
+
+      const list = document.createElement('div');
+      list.id = 'list-' + kat;
+      list.className = 'hidden p-2 space-y-2';
+
+      barangList.filter(b => b.kategori === kat).forEach(b => {
+        const item = document.createElement('div');
+        item.className = 'flex items-center justify-between border p-2 rounded';
+
+        const kiri = document.createElement('div');
+        kiri.className = 'flex items-center gap-2';
+
+        const img = document.createElement('img');
+        img.src = b.gambar;
+        img.className = 'w-10 h-10 object-cover rounded';
+        kiri.appendChild(img);
+
+        const nama = document.createElement('span');
+        nama.innerText = `${b.nama} [${b.stok}]`;
+        kiri.appendChild(nama);
+        item.appendChild(kiri);
+
+        const btnPlus = document.createElement('button');
+        btnPlus.innerText = "+ Keranjang";
+        btnPlus.className = "bg-green-500 text-white px-2 py-1 rounded";
+        btnPlus.onclick = () => pilihVarian(b);
+        item.appendChild(btnPlus);
+
+        list.appendChild(item);
+      });
+
+      div.appendChild(list);
+      container.appendChild(div);
+    });
+  }
+
+  function toggleKategori(kat) {
+    const list = document.getElementById('list-' + kat);
+    list.classList.toggle('hidden');
+  }
+
+  // --- Tambah Barang ---
+  function showAddForm() {
+    if (!loggedIn) return alert("Login dulu untuk menambah barang!");
+    document.getElementById('formTambah').classList.remove('hidden');
+  }
+  function tutupForm() { document.getElementById('formTambah').classList.add('hidden'); }
+
+  function simpanBarang() {
+    const nama = document.getElementById('namaBarang').value;
+    const kategori = document.getElementById('kategoriBarang').value;
+    const stok = parseInt(document.getElementById('stokBarang').value) || 0;
+    const fileKamera = document.getElementById('gambarBarangKamera').files[0];
+    const fileGaleri = document.getElementById('gambarBarangFile').files[0];
+
+    if (!nama || !kategori) return alert('Lengkapi data!');
+
+    const processSave = (imgData) => {
+      barangList.push({ nama, kategori, stok, gambar: imgData });
+      localStorage.setItem('barangList', JSON.stringify(barangList));
+      renderKategori();
+      tutupForm();
+    };
+
+    if (fileKamera) {
+      resizeImage(fileKamera, processSave);
+    } else if (fileGaleri) {
+      resizeImage(fileGaleri, processSave);
+    } else {
+      processSave('');
+    }
+  }
+
+  // --- Pilih Varian (pcs/bal/dus) ---
+  function pilihVarian(barang) {
+    if (!loggedIn) return alert("Login dulu untuk tambah ke keranjang!");
+    const pilihan = prompt("Pilih varian: pcs / bal / dus");
+    if (!pilihan) return;
+    cartList.push({ ...barang, jumlah: 1, varian: pilihan });
+    localStorage.setItem('cartList', JSON.stringify(cartList));
+    alert("Ditambahkan ke keranjang!");
+  }
+
+  // --- Cart ---
+  function showCart() {
+    if (!loggedIn) return alert("Login dulu untuk membuka keranjang!");
+    document.getElementById('halamanCart').classList.remove('hidden');
+    document.getElementById('kategoriList').classList.add('hidden');
+    renderCart();
+  }
+  function tutupCart() {
+    document.getElementById('halamanCart').classList.add('hidden');
+    document.getElementById('kategoriList').classList.remove('hidden');
+  }
+
+  function renderCart() {
+    const listCart = document.getElementById('listCart');
+    listCart.innerHTML = '';
+    cartList.forEach((c, i) => {
+      const li = document.createElement('li');
+      li.className = 'flex justify-between items-center border p-2 rounded';
+      li.innerHTML = `${c.nama} (${c.varian}) x${c.jumlah}
+        <div class="space-x-1">
+          <button onclick="ubahJumlah(${i},1)" class="bg-green-500 text-white px-2">+</button>
+          <button onclick="ubahJumlah(${i},-1)" class="bg-yellow-500 text-white px-2">-</button>
+          <button onclick="hapusCart(${i})" class="bg-red-600 text-white px-2">x</button>
+        </div>`;
+      listCart.appendChild(li);
+    });
+  }
+
+  function ubahJumlah(i, delta) {
+    cartList[i].jumlah += delta;
+    if (cartList[i].jumlah <= 0) cartList.splice(i, 1);
+    localStorage.setItem('cartList', JSON.stringify(cartList));
+    renderCart();
+  }
+
+  function hapusCart(i) {
+    cartList.splice(i, 1);
+    localStorage.setItem('cartList', JSON.stringify(cartList));
+    renderCart();
+  }
+
+  function checkoutCart() {
+    if (cartList.length === 0) return alert("Keranjang kosong!");
+    let pesan = "Order:\n";
+    cartList.forEach(c => {
+      pesan += `- ${c.nama} (${c.varian}) x${c.jumlah}\n`;
+    });
+    const url = `https://wa.me/?text=${encodeURIComponent(pesan)}`;
+    window.open(url, "_blank");
+  }
+
+  // --- Barang Kosong ---
+  function showKosong() {
+    document.getElementById('halamanKosong').classList.remove('hidden');
+    document.getElementById('kategoriList').classList.add('hidden');
+    const listKosong = document.getElementById('listKosong');
+    listKosong.innerHTML = '';
+    barangList.filter(b => b.stok === 0).forEach(b => {
+      const li = document.createElement('li');
+      li.className = 'border p-2 rounded';
+      li.innerText = b.nama;
+      listKosong.appendChild(li);
+    });
+  }
+  function tutupKosong() {
+    document.getElementById('halamanKosong').classList.add('hidden');
+    document.getElementById('kategoriList').classList.remove('hidden');
+  }
+
+  // --- Init ---
+  updateAuthButton();
+  renderKategori();
+</script>
+</body>
+</html>
