@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>STOKTOKO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --merah:#e40000;
+      --merah-tua:#b00000;
+      --bg:#fafafa;
+      --card:#ffffff;
+      --text:#222;
+      --sub:#777;
+      --line:#eee;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; background:var(--bg); color:var(--text);
+      font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    }
+    /* Header */
+    header{
+      position:sticky; top:0; z-index:1000;
+      background:linear-gradient(90deg,var(--merah),var(--merah-tua));
+      color:#fff; display:flex; align-items:center; justify-content:space-between;
+      padding:12px 16px; box-shadow:0 2px 8px rgba(0,0,0,.18);
+      font-weight:600; letter-spacing:.3px;
+    }
+    .brand{font-size:18px}
+    .cart-btn{
+      display:flex; align-items:center; gap:8px;
+      background:#fff; color:var(--merah); border:none; border-radius:12px; padding:6px 10px;
+      font-weight:600; box-shadow:0 2px 8px rgba(0,0,0,.12); cursor:pointer;
+    }
+    .page{padding:16px; max-width:820px; margin:0 auto;}
+    /* Tombol besar */
+    .cta{
+      display:flex; gap:12px; margin-bottom:16px;
+    }
+    .btn{
+      flex:1; display:flex; align-items:center; justify-content:center; gap:8px;
+      padding:14px 16px; border-radius:14px; border:none; cursor:pointer; font-weight:600;
+      transition:.2s transform,.2s box-shadow; box-shadow:0 4px 12px rgba(0,0,0,.08);
+    }
+    .btn:active{transform:scale(.97)}
+    .btn-primary{background:var(--merah); color:#fff}
+    .btn-outline{background:#fff; color:var(--merah); border:2px solid var(--merah)}
+    /* Form tambah */
+    form{
+      display:none; background:var(--card); border-radius:14px; padding:14px;
+      box-shadow:0 6px 16px rgba(0,0,0,.08); margin-bottom:16px;
+    }
+    label{font-size:12px; color:var(--sub)}
+    input[type="text"], input[type="number"], input[type="file"], button[type="submit"]{
+      width:100%; padding:12px; border-radius:10px; border:1px solid var(--line); margin:6px 0 12px 0;
+      font-size:14px; background:#fff;
+    }
+    button[type="submit"]{background:var(--merah); color:#fff; border:none; font-weight:600}
+    /* Kategori */
+    .category{margin:14px 0}
+    .category h3{
+      margin:0; background:#ffe9e9; color:var(--merah-tua);
+      padding:10px 12px; border-radius:10px; cursor:pointer; font-size:14px;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .products{display:none; padding:8px 4px}
+    .product{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      background:var(--card); border-radius:12px; padding:10px; margin:8px 0;
+      box-shadow:0 2px 8px rgba(0,0,0,.06);
+    }
+    .p-left{display:flex; align-items:center; gap:10px}
+    .product img{
+      width:54px; height:54px; object-fit:cover; border-radius:8px; border:1px solid var(--line);
+    }
+    .p-name{font-weight:600; font-size:14px}
+    .p-sub{font-size:12px; color:var(--sub)}
+    .plus-btn{
+      background:#fff; color:var(--merah); border:2px solid var(--merah);
+      width:42px; height:36px; border-radius:10px; font-size:20px; font-weight:700; cursor:pointer;
+    }
+    /* Halaman kosong */
+    #emptyPage h2{color:var(--merah); margin:0 0 10px}
+    .back-btn{
+      display:inline-block; background:var(--merah); color:#fff; border:none;
+      padding:8px 12px; border-radius:10px; margin-bottom:10px; cursor:pointer; font-weight:600;
+    }
+    .empty-item{
+      display:flex; align-items:center; gap:10px; background:#fff; border-radius:12px;
+      padding:10px; margin:8px 0; box-shadow:0 2px 8px rgba(0,0,0,.06);
+    }
+    .empty-item img{width:50px; height:50px; object-fit:cover; border-radius:8px; border:1px solid var(--line)}
+    /* Keranjang */
+    #cartPage header{position:static}
+    .cart-item{
+      display:flex; align-items:center; gap:10px; background:#fff; border-radius:12px; padding:10px;
+      margin:8px 0; box-shadow:0 2px 8px rgba(0,0,0,.06);
+    }
+    .cart-item img{width:60px; height:60px; border-radius:8px; object-fit:cover; border:1px solid var(--line)}
+    .item-body{flex:1}
+    .item-name{font-size:14px; font-weight:600}
+    .unit-row{display:flex; align-items:center; gap:8px; margin-top:6px}
+    .unit-select{
+      font-size:12px; padding:4px 6px; border:1px solid var(--line); border-radius:6px; background:#fff;
+    }
+    .qty{display:flex; align-items:center; gap:8px}
+    .qty button{
+      width:28px; height:28px; border:none; background:#f1f1f1; border-radius:8px; font-size:18px; cursor:pointer;
+    }
+    .qty span{min-width:18px; text-align:center}
+    .cart-footer{
+      position:sticky; bottom:0; left:0; right:0; background:#fff; border-top:1px solid var(--line);
+      display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px;
+      box-shadow:0 -4px 12px rgba(0,0,0,.06);
+    }
+    .checkout-btn{
+      background:var(--merah); color:#fff; border:none; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer;
+    }
+    /* Bottom sheet modal (aksi produk) */
+    .overlay{
+      position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; z-index:1200;
+    }
+    .overlay.active{display:block}
+    .modal{
+      position:fixed; left:0; right:0; bottom:-100%;
+      background:#fff; border-radius:16px 16px 0 0; padding:18px; z-index:1300;
+      box-shadow:0 -10px 24px rgba(0,0,0,.2); transition:bottom .28s ease-out;
+    }
+    .modal.active{bottom:0}
+    .modal h3{margin:0 0 12px; text-align:center}
+    .modal-grid{
+      display:grid; grid-template-columns:repeat(3,1fr); gap:12px;
+    }
+    .modal-grid button{
+      padding:14px 10px; border:none; border-radius:12px; font-weight:700; cursor:pointer;
+      background:#ffe9e9; color:var(--merah-tua);
+    }
+    /* Halaman switching */
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+
+  <!-- Header global -->
+  <header>
+    <div class="brand">STOKTOKO</div>
+    <button class="cart-btn" id="openCartBtn">🛒 <span id="cartCount">0</span></button>
+  </header>
+
+  <!-- PAGE: MAIN -->
+  <section id="mainPage" class="page">
+    <div class="cta">
+      <button class="btn btn-primary" id="toggleFormBtn">➕ Tambahkan Produk</button>
+      <button class="btn btn-outline" id="goEmptyBtn">📦 Barang Kosong</button>
+    </div>
+
+    <form id="productForm">
+      <label>Nama Produk</label>
+      <input type="text" id="nama" placeholder="cth: Indomie Goreng" required>
+      <label>Kategori</label>
+      <input type="text" id="kategori" placeholder="cth: Mie Instan" required>
+      <label>Sisa Stok</label>
+      <input type="number" id="stok" min="0" value="0" required>
+      <label>Gambar Produk (maks 6 MB)</label>
+      <input type="file" id="gambar" accept="image/*" required>
+      <button type="submit">Simpan Produk</button>
+    </form>
+
+    <div id="categories"></div>
+  </section>
+
+  <!-- PAGE: BARANG KOSONG -->
+  <section id="emptyPage" class="page hidden">
+    <button class="back-btn" id="backMainBtn">⬅ Kembali</button>
+    <h2>Barang Kosong</h2>
+    <div id="emptyList"></div>
+  </section>
+
+  <!-- PAGE: CART -->
+  <section id="cartPage" class="page hidden">
+    <button class="back-btn" id="backFromCartBtn">⬅ Kembali</button>
+    <h2 style="margin:8px 0 12px;color:var(--merah)">Keranjang</h2>
+    <div id="cartList"></div>
+    <div class="cart-footer">
+      <div id="cartTotal">Total: 0 barang</div>
+      <button class="checkout-btn" id="checkoutBtn">Checkout</button>
+    </div>
+  </section>
+
+  <!-- Modal aksi produk -->
+  <div class="overlay" id="overlay"></div>
+  <div class="modal" id="modal">
+    <h3>Aksi Produk</h3>
+    <div class="modal-grid">
+      <button id="mEdit">EDIT</button>
+      <button id="mStok">STOK</button>
+      <button id="mHapus">HAPUS</button>
+      <button data-unit="pcs" class="mUnit">PCS</button>
+      <button data-unit="bal" class="mUnit">BAL</button>
+      <button data-unit="dus" class="mUnit">DUS</button>
+    </div>
+  </div>
+
+<script>
+/* ======================================================================
+   STOKTOKO – IndexedDB Storage Upgrade (UI & tombol tetap sama)
+   - Produk disimpan di IndexedDB (store: "products")
+   - Gambar disimpan sebagai Blob (hemat storage & aman)
+   - Render membangun struktur categories dari DB (bukan dari variabel sementara)
+   - Semua interaksi (tambah, edit, stok, hapus, keranjang, WA) tetap sama
+   ====================================================================== */
+
+  // ====== STATE (UI) ======
+  let categories = {}; // {kategori: [{id,nama,kategori,stok,imageBlob,imageUrl}]}
+  let cart = [];       // [{prodId, nama, unit, qty, imageUrl}]
+  let selectedProductId = null; // buat modal aksi
+  const $ = (s, p=document) => p.querySelector(s);
+  const $$ = (s, p=document) => [...p.querySelectorAll(s)];
+
+  // ====== NAV / PAGE SWITCH ======
+  const mainPage = $('#mainPage');
+  const emptyPage = $('#emptyPage');
+  const cartPage = $('#cartPage');
+
+  $('#goEmptyBtn').onclick = () => { mainPage.classList.add('hidden'); emptyPage.classList.remove('hidden'); renderEmpty(); }
+  $('#backMainBtn').onclick = () => { emptyPage.classList.add('hidden'); mainPage.classList.remove('hidden'); }
+  $('#openCartBtn').onclick   = () => { mainPage.classList.add('hidden'); emptyPage.classList.add('hidden'); cartPage.classList.remove('hidden'); renderCart(); }
+  $('#backFromCartBtn').onclick = () => { cartPage.classList.add('hidden'); mainPage.classList.remove('hidden'); }
+
+  // ====== IndexedDB Setup ======
+  const DB_NAME = 'stoktokoDB';
+  const DB_VERSION = 1;
+  const STORE_PRODUCTS = 'products';
+  let db = null;
+
+  function openDB(){
+    return new Promise((resolve, reject)=>{
+      const req = indexedDB.open(DB_NAME, DB_VERSION);
+      req.onupgradeneeded = (e)=>{
+        const _db = e.target.result;
+        if(!_db.objectStoreNames.contains(STORE_PRODUCTS)){
+          const store = _db.createObjectStore(STORE_PRODUCTS, { keyPath: 'id' });
+          // index untuk kategori / nama kalau butuh query spesifik di masa depan
+          store.createIndex('kategori', 'kategori', { unique:false });
+          store.createIndex('nama', 'nama', { unique:false });
+        }
+      };
+      req.onsuccess = ()=>{ db = req.result; resolve(db); };
+      req.onerror   = ()=>reject(req.error);
+    });
+  }
+
+  function dbAddProduct(product){
+    return new Promise((resolve, reject)=>{
+      const tx = db.transaction(STORE_PRODUCTS,'readwrite');
+      tx.oncomplete = ()=>resolve();
+      tx.onerror = ()=>reject(tx.error);
+      tx.objectStore(STORE_PRODUCTS).add(product);
+    });
+  }
+
+  function dbUpdateProduct(product){
+    return new Promise((resolve, reject)=>{
+      const tx = db.transaction(STORE_PRODUCTS,'readwrite');
+      tx.oncomplete = ()=>resolve();
+      tx.onerror = ()=>reject(tx.error);
+      tx.objectStore(STORE_PRODUCTS).put(product);
+    });
+  }
+
+  function dbDeleteProduct(id){
+    return new Promise((resolve, reject)=>{
+      const tx = db.transaction(STORE_PRODUCTS,'readwrite');
+      tx.oncomplete = ()=>resolve();
+      tx.onerror = ()=>reject(tx.error);
+      tx.objectStore(STORE_PRODUCTS).delete(id);
+    });
+  }
+
+  function dbGetAllProducts(){
+    return new Promise((resolve, reject)=>{
+      const tx = db.transaction(STORE_PRODUCTS,'readonly');
+      const req = tx.objectStore(STORE_PRODUCTS).getAll();
+      req.onsuccess = ()=>resolve(req.result||[]);
+      req.onerror   = ()=>reject(req.error);
+    });
+  }
+
+  // util: buat id unik
+  function makeId(){
+    return Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+  }
+
+  // ====== FORM TAMBAH PRODUK ======
+  const form = $('#productForm');
+  $('#toggleFormBtn').onclick = () => form.style.display = (form.style.display==='block'?'none':'block');
+
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    const nama = $('#nama').value.trim();
+    const kategori = $('#kategori').value.trim();
+    const stok = parseInt($('#stok').value||'0');
+    const file = $('#gambar').files[0];
+    if (!file){ alert('Pilih gambar'); return; }
+    if (file.size > 6 * 1024 * 1024){ alert('Ukuran gambar maksimal 6 MB!'); return; }
+
+    try{
+      // baca sebagai ArrayBuffer -> simpan Blob (hemat)
+      const arrayBuf = await file.arrayBuffer();
+      const imageBlob = new Blob([arrayBuf], { type: file.type || 'image/*' });
+      const product = { id: makeId(), nama, kategori, stok, imageBlob };
+
+      await dbAddProduct(product);
+      await refreshFromDB(); // rebuild categories dari DB
+      form.reset(); form.style.display='none';
+    }catch(err){
+      console.error('Gagal simpan produk:', err);
+      alert('Gagal menyimpan produk. Coba lagi.');
+    }
+  };
+
+  // ====== BACA DB -> BANGUN categories ======
+  async function refreshFromDB(){
+    const all = await dbGetAllProducts();
+    // revoke URL lama (biar gak bocor)
+    Object.values(categories).forEach(list=>{
+      list.forEach(p=>{ try{ p.imageUrl && URL.revokeObjectURL(p.imageUrl); }catch(_){} });
+    });
+    categories = {};
+    all.forEach(p=>{
+      const url = p.imageBlob ? URL.createObjectURL(p.imageBlob) : '';
+      const item = { id:p.id, nama:p.nama, kategori:p.kategori, stok:p.stok, imageBlob:p.imageBlob, imageUrl:url };
+      if(!categories[item.kategori]) categories[item.kategori]=[];
+      categories[item.kategori].push(item);
+    });
+    renderCategories();
+    // kalau sedang di halaman Barang Kosong, refresh juga
+    if(!emptyPage.classList.contains('hidden')) renderEmpty();
+  }
+
+  // ====== RENDER KATEGORI & PRODUK (UI tetap sama) ======
+  function renderCategories(){
+    const wrap = $('#categories');
+    wrap.innerHTML = '';
+    Object.keys(categories).forEach(cat=>{
+      const catDiv = document.createElement('div');
+      catDiv.className = 'category';
+      const h = document.createElement('h3');
+      h.innerHTML = `${cat} <span>(${categories[cat].length})</span>`;
+      h.onclick = () => {
+        const pd = catDiv.querySelector('.products');
+        pd.style.display = (pd.style.display==='block'?'none':'block');
+      };
+      const productsDiv = document.createElement('div');
+      productsDiv.className = 'products';
+
+      categories[cat].forEach(p=>{
+        const row = document.createElement('div');
+        row.className = 'product';
+        row.innerHTML = `
+          <div class="p-left">
+            <img src="${p.imageUrl}" alt="">
+            <div>
+              <div class="p-name">${p.nama}</div>
+              <div class="p-sub">stok: ${p.stok}</div>
+            </div>
+          </div>
+          <button class="plus-btn" aria-label="aksi" data-id="${p.id}">+</button>
+        `;
+        productsDiv.appendChild(row);
+      });
+
+      catDiv.appendChild(h); catDiv.appendChild(productsDiv);
+      wrap.appendChild(catDiv);
+    });
+
+    // bind tombol +
+    $$('.plus-btn', wrap).forEach(btn=>{
+      btn.onclick = () => openModal(btn.dataset.id);
+    });
+  }
+
+  // ====== BARANG KOSONG (UI tetap sama) ======
+  function collectEmpty(){
+    const arr = [];
+    Object.values(categories).forEach(list=>{
+      list.forEach(p=>{ if(p.stok===0) arr.push(p); });
+    });
+    return arr;
+  }
+  function renderEmpty(){
+    const list = $('#emptyList');
+    list.innerHTML = '';
+    collectEmpty().forEach(p=>{
+      const div = document.createElement('div');
+      div.className = 'empty-item';
+      div.innerHTML = `
+        <img src="${p.imageUrl}" alt="">
+        <div>
+          <div class="p-name">${p.nama}</div>
+          <div class="p-sub">stok: 0</div>
+          <div class="p-sub">Kategori: ${p.kategori}</div>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  // ====== MODAL AKSI PRODUK (UI & alur sama) ======
+  const overlay = $('#overlay'), modal = $('#modal');
+  function openModal(prodId){
+    selectedProductId = prodId;
+    overlay.classList.add('active'); modal.classList.add('active');
+  }
+  function closeModal(){
+    overlay.classList.remove('active'); modal.classList.remove('active');
+  }
+  overlay.onclick = closeModal;
+
+  function findProductById(id){
+    for(const cat of Object.keys(categories)){
+      const idx = categories[cat].findIndex(p=>p.id===id);
+      if(idx>-1) return { cat, index:idx, p:categories[cat][idx] };
+    }
+    return null;
+  }
+
+  // EDIT (nama, kategori, gambar) – tetap sama flow-nya, tapi update ke DB
+  $('#mEdit').onclick = ()=>{
+    const ref = findProductById(selectedProductId); if(!ref) return;
+    const {cat, index, p} = ref;
+    const newName = prompt('Nama baru:', p.nama); if(!newName){ closeModal(); return; }
+    const newCat = prompt('Kategori baru:', p.kategori) || p.kategori;
+
+    const afterUpdate = async ()=>{
+      // pindah kategori bila berubah
+      if(newCat !== p.kategori){
+        categories[cat].splice(index,1);
+        if(!categories[newCat]) categories[newCat]=[];
+        p.kategori = newCat;
+        categories[newCat].push(p);
+      }
+      p.nama = newName;
+
+      // simpan ke DB
+      try{
+        await dbUpdateProduct({ id:p.id, nama:p.nama, kategori:p.kategori, stok:p.stok, imageBlob:p.imageBlob });
+      }catch(err){ console.error('Gagal update DB:', err); }
+
+      renderCategories(); renderEmpty(); closeModal();
+    };
+
+    if(confirm('Ganti gambar juga?')){
+      const input = document.createElement('input');
+      input.type='file'; input.accept='image/*';
+      input.onchange = async e=>{
+        const file = e.target.files[0];
+        if(!file){ afterUpdate(); return; }
+        if(file.size > 6*1024*1024){ alert('Ukuran gambar maksimal 6 MB!'); return; }
+        try{
+          const buf = await file.arrayBuffer();
+          const blob = new Blob([buf], { type:file.type || 'image/*' });
+          // revoke url lama sebelum replace
+          try{ p.imageUrl && URL.revokeObjectURL(p.imageUrl); }catch(_){}
+          p.imageBlob = blob;
+          p.imageUrl = URL.createObjectURL(blob);
+          await dbUpdateProduct({ id:p.id, nama:p.nama, kategori:p.kategori, stok:p.stok, imageBlob:p.imageBlob });
+          afterUpdate();
+        }catch(err){ console.error('Gagal ganti gambar:', err); afterUpdate(); }
+      };
+      input.click();
+    }else{
+      afterUpdate();
+    }
+  };
+
+  // STOK (tetap sama, tapi commit ke DB)
+  $('#mStok').onclick = async ()=>{
+    const ref = findProductById(selectedProductId); if(!ref) return;
+    const {p} = ref;
+    const val = prompt('Stok baru:', p.stok);
+    if(val===null) { closeModal(); return; }
+    p.stok = parseInt(val||'0');
+    try{
+      await dbUpdateProduct({ id:p.id, nama:p.nama, kategori:p.kategori, stok:p.stok, imageBlob:p.imageBlob });
+    }catch(err){ console.error('Gagal update stok:', err); }
+    renderCategories(); renderEmpty(); closeModal();
+  };
+
+  // HAPUS (tetap sama, plus hapus dari DB)
+  $('#mHapus').onclick = async ()=>{
+    const ref = findProductById(selectedProductId); if(!ref) return;
+    const {cat, index, p} = ref;
+    if(!confirm('Hapus produk ini?')) return;
+    try{
+      await dbDeleteProduct(p.id);
+    }catch(err){ console.error('Gagal hapus DB:', err); }
+    // revoke url supaya tidak leak
+    try{ p.imageUrl && URL.revokeObjectURL(p.imageUrl); }catch(_){}
+    categories[cat].splice(index,1);
+    if(categories[cat].length===0) delete categories[cat];
+    // bersihkan dari cart juga
+    cart = cart.filter(c=>c.prodId!==p.id);
+    updateCartCount();
+    renderCategories(); renderEmpty(); if(!$('#cartPage').classList.contains('hidden')) renderCart();
+    closeModal();
+  };
+
+  // Tambah ke keranjang (PCS/BAL/DUS) – tetap sama
+  $$('.mUnit').forEach(b=>{
+    b.onclick = ()=> {
+      const unit = b.dataset.unit;
+      const ref = findProductById(selectedProductId); if(!ref) return;
+      const {p} = ref;
+      const exist = cart.find(c=>c.prodId===p.id && c.unit===unit);
+      if(exist) exist.qty += 1;
+      else cart.push({ prodId:p.id, nama:p.nama, unit, qty:1, imageUrl:p.imageUrl });
+      updateCartCount();
+      closeModal();
+    }
+  });
+
+  function updateCartCount(){
+    const total = cart.reduce((a,c)=>a+c.qty,0);
+    $('#cartCount').textContent = total;
+  }
+
+  // ====== CART RENDER (UI tetap sama) ======
+  function renderCart(){
+    const list = $('#cartList');
+    list.innerHTML = '';
+    cart.forEach((item, i)=>{
+      const row = document.createElement('div');
+      row.className = 'cart-item';
+      row.innerHTML = `
+        <input type="checkbox" class="chk">
+        <img src="${item.imageUrl}" alt="">
+        <div class="item-body">
+          <div class="item-name">${item.nama}</div>
+          <div class="unit-row">
+            <select class="unit-select">
+              <option ${item.unit==='pcs'?'selected':''}>pcs</option>
+              <option ${item.unit==='bal'?'selected':''}>bal</option>
+              <option ${item.unit==='dus'?'selected':''}>dus</option>
+            </select>
+            <div class="qty">
+              <button class="minus">-</button>
+              <span class="q">${item.qty}</span>
+              <button class="plus">+</button>
+            </div>
+          </div>
+        </div>
+      `;
+      // Bind events
+      const unitSel = $('.unit-select', row);
+      unitSel.onchange = ()=>{ item.unit = unitSel.value; };
+      const minus = $('.minus', row);
+      const plus = $('.plus', row);
+      const qSpan = $('.q', row);
+      const chk = $('.chk', row);
+
+      minus.onclick = ()=>{ if(item.qty>1){ item.qty--; qSpan.textContent=item.qty; updateCartCount(); updateCartTotal(); } };
+      plus.onclick  = ()=>{ item.qty++; qSpan.textContent=item.qty; updateCartCount(); updateCartTotal(); };
+      chk.onchange  = updateCartTotal;
+
+      list.appendChild(row);
+    });
+    updateCartTotal();
+  }
+
+  function updateCartTotal(){
+    const rows = $$('#cartList .cart-item');
+    let total = 0;
+    rows.forEach((row, idx)=>{
+      const chk = $('.chk', row);
+      if(chk.checked){
+        const q = parseInt($('.q', row).textContent||'0');
+        total += q;
+      }
+    });
+    $('#cartTotal').textContent = `Total: ${total} barang`;
+  }
+
+  // ====== CHECKOUT -> WHATSAPP (dibiarkan sesuai punyamu) ======
+  $('#checkoutBtn').onclick = ()=>{
+    const rows = $$('#cartList .cart-item');
+    let lines = [];
+    rows.forEach((row, idx)=>{
+      const chk = $('.chk', row);
+      if(chk.checked){
+        const name = $('.item-name', row).textContent.trim();
+        const unit = $('.unit-select', row).value;
+        const qty  = parseInt($('.q', row).textContent||'0');
+        lines.push(`${lines.length+1}. ${name} – ${qty} ${unit}`);
+      }
+    });
+    if(lines.length===0){ alert('Pilih dulu item yang mau di-checkout.'); return; }
+    const msg = `Pesanan STOKTOKO:%0A${encodeURIComponent(lines.join('%0A'))}`;
+    const url = `https://wa.me/?text=${msg}`;
+    window.open(url, '_blank');
+  };
+
+  // ====== INIT: buka DB lalu load data ke UI ======
+  (async function init(){
+    try{
+      await openDB();
+      await refreshFromDB();
+    }catch(err){
+      console.error('Gagal inisialisasi DB:', err);
+      // fallback: render kosong supaya UI tetap tampil
+      renderCategories();
+    }
+  })();
+
+  /* Catatan:
+     - Semua UI (HTML/CSS) dan alur klik sama persis.
+     - Hanya storage produk yang pindah ke IndexedDB (gambar Blob, bukan base64).
+     - Cart tetap in-memory seperti sebelumnya (biar tidak ubah alur).
+     - Saat edit gambar: ganti Blob di DB dan refresh tampilan.
+     - Saat delete: hapus record di DB, bersihkan objectURL, dan update UI.
+  */
+</script>
+</body>
+</html>
