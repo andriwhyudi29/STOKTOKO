@@ -2,132 +2,145 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>StokToko</title>
+  <title>STOKTOKO</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fff; color:#333; }
-    header { background:#d43f3f; color:#fff; padding:14px; display:flex; justify-content:space-between; align-items:center; }
-    header .left { font-size:20px; font-weight:bold; }
-    header .right { position:relative; }
-    #cartCountTag { background:#fff; color:#d43f3f; border-radius:50%; padding:2px 6px; font-size:12px; position:absolute; top:-6px; right:-6px; }
-    .btn { background:#d43f3f; color:#fff; border:none; padding:10px; border-radius:6px; cursor:pointer; font-weight:bold; }
-    .btn:hover { opacity:0.9; }
-    .btn-secondary { background:#777; color:#fff; }
-    .btn-outline { background:#fff; border:1px solid #d43f3f; color:#d43f3f; }
-    .btn-small { font-size:14px; padding:6px 10px; border-radius:4px; }
-    .row { display:flex; gap:10px; }
-    .input { width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; margin-top:6px; }
-    .category { border:1px solid #eee; border-radius:6px; margin:8px 0; }
-    .category-header { padding:10px; background:#f5f5f5; font-weight:bold; cursor:pointer; display:flex; justify-content:space-between; }
-    .category-products { display:none; padding:10px; }
-    .product { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
-    .product img { width:60px; height:60px; object-fit:cover; border-radius:6px; border:1px solid #ddd; }
-    .product-info { flex:1; }
-    .plus { background:#d43f3f; color:#fff; border:none; border-radius:50%; width:32px; height:32px; font-size:18px; cursor:pointer; }
-    .bottom-nav { position:fixed; bottom:0; left:0; right:0; display:flex; border-top:1px solid #ddd; background:#fff; }
-    .nav-item { flex:1; text-align:center; padding:10px; cursor:pointer; font-weight:bold; }
-    .nav-item.active { color:#d43f3f; }
-    .overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000; }
-    .popup { background:#fff; padding:20px; border-radius:10px; width:90%; max-width:400px; box-shadow:0 4px 12px rgba(0,0,0,0.3); }
-    .empty { text-align:center; padding:20px; color:#777; }
-    .cart-item { display:flex; align-items:center; gap:10px; border-bottom:1px solid #eee; padding:8px 0; }
-    .cart-item img { width:50px; height:50px; object-fit:cover; border-radius:6px; border:1px solid #ddd; }
-    .cart-info { flex:1; }
-    pre { background:#fafafa; padding:6px; border-radius:6px; font-size:14px; white-space:pre-wrap; }
+    body {font-family: Arial, sans-serif; margin:0; background:#fff; color:#333;}
+    header {display:flex; justify-content:space-between; align-items:center; padding:12px; background:#c62828; color:#fff;}
+    header .right {position:relative;}
+    header button {background:none; border:none; font-size:20px; color:#fff; cursor:pointer;}
+    #cartCountTag {position:absolute; top:-6px; right:-6px; background:#fff; color:#c62828; border-radius:50%; padding:2px 6px; font-size:12px;}
+
+    main {padding:12px; padding-bottom:70px;}
+    h3 {margin:10px 0;}
+    .btn {padding:10px; border:none; border-radius:6px; cursor:pointer; background:#c62828; color:#fff; font-weight:600;}
+    .btn-secondary {background:#999; color:#fff;}
+    .btn-outline {background:#fff; border:1px solid #c62828; color:#c62828;}
+    .btn-small {font-size:12px; padding:6px; border-radius:5px;}
+
+    .input {width:100%; padding:8px; margin:6px 0; border:1px solid #ccc; border-radius:5px;}
+    .row {display:flex; gap:8px;}
+
+    .category {border:1px solid #ddd; border-radius:6px; margin-bottom:10px;}
+    .category-header {padding:10px; background:#f3f3f3; font-weight:bold; cursor:pointer;}
+    .category-products {display:none; padding:8px;}
+    .product {display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid #eee;}
+    .product:last-child {border-bottom:none;}
+    .product img {width:50px; height:50px; object-fit:cover; border-radius:4px;}
+    .product-info {flex:1; margin-left:8px;}
+    .product .plus {background:#c62828; color:#fff; border:none; border-radius:50%; width:28px; height:28px; cursor:pointer;}
+
+    .overlay {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:1000;}
+    .popup {background:#fff; padding:16px; border-radius:8px; width:90%; max-width:400px; max-height:90%; overflow:auto;}
+
+    .cart-item {display:flex; align-items:center; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:8px;}
+    .cart-item img {width:40px; height:40px; object-fit:cover; border-radius:4px; margin:0 8px;}
+    .cart-info {flex:1;}
+
+    .bottom-nav {position:fixed; bottom:0; left:0; width:100%; display:flex; border-top:1px solid #ccc; background:#fff;}
+    .nav-item {flex:1; text-align:center; padding:10px; cursor:pointer;}
+    .nav-item.active {background:#c62828; color:#fff; font-weight:bold;}
+
+    .empty {text-align:center; color:#777; padding:20px;}
+    pre {white-space:pre-wrap; font-family:inherit;}
   </style>
 </head>
 <body>
-  <!-- Header -->
+  <!-- HEADER -->
   <header>
-    <div class="left">📦 STOKTOKO</div>
+    <div class="left">📦 <span>STOKTOKO</span></div>
     <div class="right">
-      <button id="cartIconBtn" class="icon-btn" style="background:none;border:none;cursor:pointer;">
-        🛒
-      </button>
+      <button id="cartIconBtn" title="Keranjang">🛒</button>
       <span id="cartCountTag">0</span>
     </div>
   </header>
 
-  <!-- Halaman -->
-  <main style="padding:14px; margin-bottom:70px;">
-    <!-- Home -->
+  <!-- MAIN CONTENT -->
+  <main>
+    <!-- HOME PAGE -->
     <section id="homePage">
-      <div class="row" style="margin-bottom:18px;">
-        <button id="addProductBtn" class="btn" style="flex:1;">➕ Tambah Produk</button>
-        <button id="outOfStockBtn" class="btn btn-secondary" style="flex:1;">⚠️ Barang Kosong</button>
+      <div class="row" style="margin-bottom:14px">
+        <button id="addProductBtn" class="btn" style="flex:1">➕ Tambah Produk</button>
+        <button id="outOfStockBtn" class="btn btn-secondary" style="flex:1">⚠️ Barang Kosong</button>
       </div>
 
       <h3>📂 Daftar Kategori</h3>
-      <div id="categoriesList"></div>
+      <div id="categoriesList">
+        <div class="empty">Belum ada produk.</div>
+      </div>
     </section>
 
-    <!-- Cart -->
-    <section id="cartPage" style="display:none;">
-      <h3>🛒 Keranjang Belanja</h3>
-      <div class="row" style="margin:10px 0;">
+    <!-- CART PAGE -->
+    <section id="cartPage" style="display:none">
+      <h3>🛒 Keranjang</h3>
+      <div style="margin:8px 0">
         <label><input type="checkbox" id="selectAllCart"> Pilih Semua</label>
       </div>
       <div id="cartList"></div>
-      <div class="row" style="margin-top:16px;gap:10px;">
-        <button id="checkoutBtn" class="btn" style="flex:1;">Checkout</button>
-        <button id="deleteCheckedBtn" class="btn btn-secondary" style="flex:1;">Hapus</button>
+      <div class="row" style="margin-top:14px">
+        <button id="checkoutBtn" class="btn" style="flex:1">Checkout → WA</button>
+        <button id="deleteCheckedBtn" class="btn btn-secondary" style="flex:1">Hapus</button>
       </div>
-      <div style="margin-top:14px;">
-        <button id="backHomeBtn" class="btn btn-outline" style="width:100%;">⬅️ Kembali</button>
+      <div style="margin-top:12px">
+        <button id="backHomeBtn" class="btn btn-outline" style="width:100%">⬅️ Kembali</button>
       </div>
     </section>
 
-    <!-- Orders -->
-    <section id="ordersPage" style="display:none;">
+    <!-- ORDERS PAGE -->
+    <section id="ordersPage" style="display:none">
       <h3>📋 Pesanan Pending</h3>
       <div id="orderList"></div>
 
-      <h3 style="margin-top:20px;">➕ Tambah Pesanan Manual</h3>
+      <h3 style="margin-top:18px">➕ Tambah Pesanan Manual</h3>
       <input id="custNameInput" class="input" placeholder="Nama Pelanggan">
       <input id="custWaInput" class="input" placeholder="Nomor WA (opsional)">
       <input id="custDateInput" class="input" placeholder="Tanggal/Hari Pengambilan">
+      <textarea id="custOrderInput" rows="4" class="input" placeholder="Tulis pesanan; tekan Enter untuk bullet"></textarea>
+      <button id="addOrderBtn" class="btn" style="margin-top:10px;width:100%">+ Tambah Pesanan</button>
 
-      <!-- Textarea dengan auto-bullet -->
-      <textarea id="custOrderInput" class="input" rows="4" placeholder="Pesanan (contoh: 
-• Roti 5 dus
-• Air 3 bal)"></textarea>
-
-      <button id="addOrderBtn" class="btn" style="margin-top:10px;width:100%;">+ Tambah Pesanan</button>
-
-      <div style="margin-top:20px;display:flex;justify-content:space-between;align-items:center;">
-        <h3>📜 Riwayat Pesanan</h3>
+      <div style="margin-top:18px; display:flex; justify-content:space-between; align-items:center">
+        <h3>📜 Riwayat</h3>
         <button id="openHistoryBtn" class="btn-small btn-outline">Lihat Semua</button>
       </div>
-      <div id="historyList"></div>
+      <div id="historyList" style="margin-top:8px"></div>
     </section>
   </main>
 
-  <!-- Bottom Nav -->
+  <!-- BOTTOM NAVIGATION -->
   <div class="bottom-nav">
     <div id="navHome" class="nav-item active">🏠 Home</div>
     <div id="navOrders" class="nav-item">📋 Pesanan</div>
   </div>
-  <!-- Popup: Tambah/Edit Produk -->
+  <!-- ======================
+       PART 3: POPUPS
+  ====================== -->
+
+  <!-- Add / Edit Product -->
   <div id="addProductOverlay" class="overlay">
     <div class="popup">
       <h3 id="addEditTitle">Tambah Produk</h3>
       <input id="productIdHidden" type="hidden">
-      <input id="productName" class="input" placeholder="Nama Produk" style="margin-top:10px;">
-      <input id="productCategory" class="input" placeholder="Kategori" style="margin-top:10px;">
-      <input id="productStock" class="input" type="number" placeholder="Stok" style="margin-top:10px;">
-      <input id="productImage" class="input" type="file" accept="image/*" style="margin-top:10px;">
-      <div class="row" style="margin-top:16px;">
-        <button id="saveProductBtn" class="btn" style="flex:1;">💾 Simpan</button>
-        <button id="cancelProductBtn" class="btn btn-secondary" style="flex:1;">Batal</button>
+      <input id="productName" class="input" placeholder="Nama Produk">
+      <input id="productCategory" class="input" placeholder="Kategori">
+      <input id="productStock" class="input" type="number" placeholder="Stok (angka)">
+      <select id="productUnit" class="input">
+        <option value="PCS">PCS</option>
+        <option value="BAL">BAL</option>
+        <option value="DUS">DUS</option>
+      </select>
+      <input id="productImage" class="input" type="file" accept="image/*">
+      <div class="row" style="margin-top:12px">
+        <button id="saveProductBtn" class="btn" style="flex:1">💾 Simpan</button>
+        <button id="cancelProductBtn" class="btn btn-secondary" style="flex:1">Batal</button>
       </div>
     </div>
   </div>
 
-  <!-- Popup: Aksi Produk (+) -->
+  <!-- Product Actions (+) -->
   <div id="productActionOverlay" class="overlay">
     <div class="popup">
       <h3>Aksi Produk</h3>
-      <div class="row" style="margin-top:12px;flex-direction:column;gap:8px;">
+      <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px">
         <button id="editBtn" class="btn btn-outline">✏️ Edit Produk</button>
         <button id="stockBtn" class="btn btn-outline">📦 Update Stok</button>
         <button id="deleteBtn" class="btn btn-outline">🗑️ Hapus Produk</button>
@@ -137,353 +150,244 @@
     </div>
   </div>
 
-  <!-- Popup: Order Produk -->
+  <!-- Order Prompt -->
   <div id="orderPromptOverlay" class="overlay">
     <div class="popup" id="orderPromptPopup">
       <h3>Order Produk</h3>
-      <input id="orderQty" class="input" type="number" placeholder="Jumlah" style="margin-top:12px;">
-      <div class="row" style="margin-top:12px;gap:8px;">
+      <input id="orderQty" class="input" type="number" placeholder="Jumlah">
+      <div style="display:flex; gap:8px; margin-top:10px">
         <button class="btn-small btn-outline" data-unit="PCS">PCS</button>
         <button class="btn-small btn-outline" data-unit="BAL">BAL</button>
         <button class="btn-small btn-outline" data-unit="DUS">DUS</button>
       </div>
-      <div class="row" style="margin-top:16px;">
-        <button id="confirmOrderBtn" class="btn" style="flex:1;">OK</button>
-        <button id="cancelOrderBtn" class="btn btn-secondary" style="flex:1;">Batal</button>
+      <div style="display:flex; gap:8px; margin-top:12px">
+        <button id="confirmOrderBtn" class="btn" style="flex:1">OK</button>
+        <button id="cancelOrderBtn" class="btn btn-secondary" style="flex:1">Batal</button>
       </div>
     </div>
   </div>
 
-  <!-- Popup: History Pesanan -->
+  <!-- History Popup -->
   <div id="historyOverlay" class="overlay">
     <div class="popup">
       <h3>Riwayat Pesanan</h3>
-      <div id="historyFullList" style="max-height:320px;overflow-y:auto;margin-top:10px;"></div>
-      <div class="row" style="margin-top:16px;">
-        <button id="clearHistoryBtn" class="btn btn-secondary" style="flex:1;">🗑️ Bersihkan</button>
-        <button id="closeHistoryBtn" class="btn" style="flex:1;">Tutup</button>
+      <div id="historyFullList" style="max-height:320px; overflow:auto; margin-top:10px"></div>
+      <div style="display:flex; gap:8px; margin-top:12px">
+        <button id="clearHistoryBtn" class="btn btn-secondary" style="flex:1">🗑️ Bersihkan</button>
+        <button id="closeHistoryBtn" class="btn" style="flex:1">Tutup</button>
       </div>
     </div>
   </div>
+  <!-- ======================
+       PART 4: SCRIPT
+  ====================== -->
   <script>
-  // ===============================
-  // IndexedDB Setup
-  // ===============================
-  let db;
-  const request = indexedDB.open("stoktokoDB", 1);
-  request.onupgradeneeded = e => {
-    db = e.target.result;
-    if (!db.objectStoreNames.contains("products")) {
-      db.createObjectStore("products", { keyPath: "id", autoIncrement: true });
-    }
-    if (!db.objectStoreNames.contains("cart")) {
-      db.createObjectStore("cart", { keyPath: "id", autoIncrement: true });
-    }
-    if (!db.objectStoreNames.contains("orders")) {
-      db.createObjectStore("orders", { keyPath: "id", autoIncrement: true });
-    }
-    if (!db.objectStoreNames.contains("history")) {
-      db.createObjectStore("history", { keyPath: "id", autoIncrement: true });
-    }
-  };
-  request.onsuccess = e => { db = e.target.result; loadCategories(); loadCart(); loadOrders(); loadHistory(); };
+  (function(){
+    let db;
+    const DB_NAME = "stoktokoDB";
+    const DB_VERSION = 1;
 
-  function tx(store, mode) { return db.transaction(store, mode).objectStore(store); }
-
-  // ===============================
-  // DOM Elements
-  // ===============================
-  const addProductBtn = document.getElementById("addProductBtn");
-  const addProductOverlay = document.getElementById("addProductOverlay");
-  const saveProductBtn = document.getElementById("saveProductBtn");
-  const cancelProductBtn = document.getElementById("cancelProductBtn");
-  const categoriesList = document.getElementById("categoriesList");
-  const outOfStockBtn = document.getElementById("outOfStockBtn");
-
-  const productActionOverlay = document.getElementById("productActionOverlay");
-  const editBtn = document.getElementById("editBtn");
-  const stockBtn = document.getElementById("stockBtn");
-  const deleteBtn = document.getElementById("deleteBtn");
-  const orderBtn = document.getElementById("orderBtn");
-  const closeActionsBtn = document.getElementById("closeActionsBtn");
-
-  const orderPromptOverlay = document.getElementById("orderPromptOverlay");
-  const confirmOrderBtn = document.getElementById("confirmOrderBtn");
-  const cancelOrderBtn = document.getElementById("cancelOrderBtn");
-
-  const cartPage = document.getElementById("cartPage");
-  const homePage = document.getElementById("homePage");
-  const ordersPage = document.getElementById("ordersPage");
-  const navHome = document.getElementById("navHome");
-  const navOrders = document.getElementById("navOrders");
-
-  const cartIconBtn = document.getElementById("cartIconBtn");
-  const cartCountTag = document.getElementById("cartCountTag");
-  const cartList = document.getElementById("cartList");
-  const selectAllCart = document.getElementById("selectAllCart");
-  const checkoutBtn = document.getElementById("checkoutBtn");
-  const deleteCheckedBtn = document.getElementById("deleteCheckedBtn");
-  const backHomeBtn = document.getElementById("backHomeBtn");
-
-  const custNameInput = document.getElementById("custNameInput");
-  const custWaInput = document.getElementById("custWaInput");
-  const custDateInput = document.getElementById("custDateInput");
-  const custOrderInput = document.getElementById("custOrderInput");
-  const addOrderBtn = document.getElementById("addOrderBtn");
-  const orderList = document.getElementById("orderList");
-  const openHistoryBtn = document.getElementById("openHistoryBtn");
-  const historyList = document.getElementById("historyList");
-
-  const historyOverlay = document.getElementById("historyOverlay");
-  const historyFullList = document.getElementById("historyFullList");
-  const clearHistoryBtn = document.getElementById("clearHistoryBtn");
-  const closeHistoryBtn = document.getElementById("closeHistoryBtn");
-
-  // ===============================
-  // Popup Controls
-  // ===============================
-  function openPopup(el) { el.style.display = "flex"; }
-  function closePopup(el) { el.style.display = "none"; }
-
-  addProductBtn.onclick = () => { 
-    document.getElementById("addEditTitle").textContent="Tambah Produk"; 
-    openPopup(addProductOverlay); 
-  };
-  cancelProductBtn.onclick = () => closePopup(addProductOverlay);
-
-  closeActionsBtn.onclick = () => closePopup(productActionOverlay);
-  cancelOrderBtn.onclick = () => closePopup(orderPromptOverlay);
-
-  // ===============================
-  // Save Product
-  // ===============================
-  saveProductBtn.onclick = () => {
-    const name = document.getElementById("productName").value.trim();
-    const cat = document.getElementById("productCategory").value.trim();
-    const stock = parseInt(document.getElementById("productStock").value || "0");
-    const file = document.getElementById("productImage").files[0];
-
-    if (!name || !cat) return alert("Lengkapi data produk!");
-    if (file && file.size > 6*1024*1024) return alert("Gambar max 6MB");
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const obj = { name, category: cat, stock, img: reader.result };
-      tx("products","readwrite").add(obj).onsuccess = () => {
-        closePopup(addProductOverlay); loadCategories();
-        document.getElementById("productName").value="";
-        document.getElementById("productCategory").value="";
-        document.getElementById("productStock").value="";
-        document.getElementById("productImage").value="";
-      };
+    // buka database
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = function(e){
+      db = e.target.result;
+      if(!db.objectStoreNames.contains("products"))
+        db.createObjectStore("products",{keyPath:"id",autoIncrement:true});
+      if(!db.objectStoreNames.contains("cart"))
+        db.createObjectStore("cart",{keyPath:"id",autoIncrement:true});
+      if(!db.objectStoreNames.contains("orders"))
+        db.createObjectStore("orders",{keyPath:"id",autoIncrement:true});
     };
-    if (file) reader.readAsDataURL(file);
-    else {
-      const obj = { name, category: cat, stock, img:"" };
-      tx("products","readwrite").add(obj).onsuccess = () => { 
-        closePopup(addProductOverlay); loadCategories(); 
-      };
-    }
-  };
+    req.onsuccess = function(e){ db = e.target.result; initApp(); };
+    req.onerror = function(){ alert("IndexedDB error"); };
 
-  // ===============================
-  // Load Categories + Products
-  // ===============================
-  function loadCategories() {
-    categoriesList.innerHTML="";
-    const cats={};
-    tx("products").getAll().onsuccess=e=>{
-      e.target.result.forEach(p=>{
-        if (!cats[p.category]) cats[p.category]=[];
-        cats[p.category].push(p);
-      });
-      Object.keys(cats).forEach(cat=>{
-        const cDiv=document.createElement("div");
-        cDiv.className="category";
-        cDiv.innerHTML=`<div class="category-header">${cat}<span>▼</span></div>`;
-        const pDiv=document.createElement("div");
-        pDiv.className="category-products";
-        cats[cat].forEach(prod=>{
-          const row=document.createElement("div");
-          row.className="product";
-          row.innerHTML=`<img src="${prod.img||''}"><div class="product-info"><b>${prod.name}</b><br>Stok: ${prod.stock}</div><button class="plus">+</button>`;
-          const plus=row.querySelector(".plus");
-          plus.onclick=()=>{ currentProduct=prod; openPopup(productActionOverlay); };
-          pDiv.appendChild(row);
+    // helpers
+    function store(name,mode="readonly"){return db.transaction(name,mode).objectStore(name);}
+    function getAll(name){return new Promise(res=>{const q=store(name).getAll();q.onsuccess=()=>res(q.result||[]);q.onerror=()=>res([]);});}
+    function getById(name,id){return new Promise(res=>{const q=store(name).get(id);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null);});}
+    function fileToDataURL(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=()=>rej();fr.readAsDataURL(file);});}
+    function escapeHtml(s){if(!s&&s!==0)return"";return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));}
+    function placeholderSvg(){return "data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='100%' height='100%' fill='#f3f3f3'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='#ccc' font-size='18'>No Image</text></svg>`);}
+
+    function el(id){return document.getElementById(id);}
+    let selectedProduct=null, orderUnit="PCS";
+
+    function initApp(){
+      loadCategories(); loadCart(); loadOrders(); loadHistory();
+
+      // Navigasi
+      el("navHome").onclick=()=>showPage("home");
+      el("navOrders").onclick=()=>showPage("orders");
+      el("cartIconBtn").onclick=()=>showPage("cart");
+      function showPage(p){
+        el("homePage").style.display=(p==="home")?"block":"none";
+        el("cartPage").style.display=(p==="cart")?"block":"none";
+        el("ordersPage").style.display=(p==="orders")?"block":"none";
+        el("navHome").classList.toggle("active",p==="home");
+        el("navOrders").classList.toggle("active",p==="orders");
+      }
+
+      // Tambah Produk
+      el("addProductBtn").onclick=()=>{
+        el("productIdHidden").value="";
+        el("addEditTitle").textContent="Tambah Produk";
+        el("addProductOverlay").style.display="flex";
+      };
+      el("cancelProductBtn").onclick=()=>el("addProductOverlay").style.display="none";
+
+      // Simpan Produk
+      el("saveProductBtn").onclick=async ()=>{
+        const name=el("productName").value.trim();
+        const cat=el("productCategory").value.trim();
+        const stock=parseInt(el("productStock").value||"0");
+        const unit=el("productUnit").value||"PCS";
+        const file=el("productImage").files[0];
+        if(!name||!cat){alert("Nama & kategori wajib.");return;}
+        if(file&&file.size>6*1024*1024){alert("Max 6MB");return;}
+        let imgData="";
+        if(file){try{imgData=await fileToDataURL(file);}catch{}}
+        const obj={name,category:cat,stock,unit,img:imgData};
+        const pid=el("productIdHidden").value;
+        const tx=db.transaction("products","readwrite").objectStore("products");
+        if(pid){obj.id=Number(pid);tx.put(obj);} else {tx.add(obj);}
+        tx.transaction.oncomplete=()=>{el("addProductOverlay").style.display="none"; loadCategories();};
+      };
+
+      // Barang Kosong
+      el("outOfStockBtn").onclick=()=>loadCategories(true);
+
+      // Load Kategori + Produk
+      async function loadCategories(outOnly=false){
+        const wrap=el("categoriesList"); wrap.innerHTML="";
+        const products=await getAll("products");
+        const groups={};
+        products.forEach(p=>{
+          if(outOnly && p.stock>0)return;
+          if(!groups[p.category]) groups[p.category]=[];
+          groups[p.category].push(p);
         });
-        cDiv.appendChild(pDiv);
-        cDiv.querySelector(".category-header").onclick=()=>{ 
-          pDiv.style.display=pDiv.style.display==="block"?"none":"block"; 
-        };
-        categoriesList.appendChild(cDiv);
-      });
-    };
-  }
+        const cats=Object.keys(groups).sort();
+        if(cats.length===0){wrap.innerHTML="<div class='empty'>Belum ada produk.</div>";return;}
+        cats.forEach(cat=>{
+          const c=document.createElement("div");c.className="category";
+          c.innerHTML=`<div class="category-header">${escapeHtml(cat)} <span class="tag">${groups[cat].length} item</span></div>`;
+          const pDiv=document.createElement("div");pDiv.className="category-products";
+          groups[cat].forEach(prod=>{
+            const it=document.createElement("div");it.className="product";
+            it.innerHTML=`<img src="${prod.img||placeholderSvg()}"><div class="product-info"><div style="font-weight:700">${escapeHtml(prod.name)}</div><div class="small-muted">Stok: ${prod.stock} ${prod.unit}</div></div><button class="plus" data-id="${prod.id}">+</button>`;
+            it.querySelector(".plus").onclick=()=>{selectedProduct=prod.id;el("productActionOverlay").style.display="flex";};
+            pDiv.appendChild(it);
+          });
+          c.querySelector(".category-header").onclick=()=>{pDiv.style.display=(pDiv.style.display==="block")?"none":"block";};
+          c.appendChild(pDiv); wrap.appendChild(c);
+        });
+      }
 
-  // ===============================
-  // Actions (+)
-  // ===============================
-  let currentProduct=null;
-  editBtn.onclick=()=>{
-    if(!currentProduct) return;
-    document.getElementById("addEditTitle").textContent="Edit Produk";
-    document.getElementById("productName").value=currentProduct.name;
-    document.getElementById("productCategory").value=currentProduct.category;
-    document.getElementById("productStock").value=currentProduct.stock;
-    document.getElementById("productIdHidden").value=currentProduct.id;
-    closePopup(productActionOverlay); openPopup(addProductOverlay);
-  };
-  stockBtn.onclick=()=>{
-    const ns=prompt("Masukkan stok baru:",currentProduct.stock);
-    if(ns!==null){ 
-      currentProduct.stock=parseInt(ns);
-      tx("products","readwrite").put(currentProduct).onsuccess=loadCategories;
+      // Aksi Produk (+)
+      el("closeActionsBtn").onclick=()=>el("productActionOverlay").style.display="none";
+      el("editBtn").onclick=async ()=>{
+        if(!selectedProduct)return; const p=await getById("products",selectedProduct); if(!p)return;
+        el("productIdHidden").value=p.id; el("productName").value=p.name; el("productCategory").value=p.category; el("productStock").value=p.stock; el("productUnit").value=p.unit;
+        el("productActionOverlay").style.display="none"; el("addProductOverlay").style.display="flex"; el("addEditTitle").textContent="Edit Produk";
+      };
+      el("stockBtn").onclick=async ()=>{
+        if(!selectedProduct)return; const p=await getById("products",selectedProduct); if(!p)return;
+        const val=prompt("Stok baru:",p.stock); if(val===null)return; p.stock=Number(val)||0;
+        const tx=db.transaction("products","readwrite").objectStore("products"); tx.put(p);
+        tx.transaction.oncomplete=()=>{el("productActionOverlay").style.display="none";loadCategories();};
+      };
+      el("deleteBtn").onclick=async ()=>{
+        if(!selectedProduct)return; if(!confirm("Hapus produk ini?"))return;
+        db.transaction("products","readwrite").objectStore("products").delete(selectedProduct).transaction.oncomplete=()=>{el("productActionOverlay").style.display="none";loadCategories();};
+      };
+      el("orderBtn").onclick=()=>{orderUnit="PCS"; el("orderQty").value=""; el("productActionOverlay").style.display="none"; el("orderPromptOverlay").style.display="flex";};
+      el("cancelOrderBtn").onclick=()=>el("orderPromptOverlay").style.display="none";
+      document.querySelectorAll("#orderPromptPopup [data-unit]").forEach(btn=>{
+        btn.onclick=()=>{orderUnit=btn.dataset.unit;document.querySelectorAll("#orderPromptPopup [data-unit]").forEach(b=>b.classList.remove("active"));btn.classList.add("active");};
+      });
+      el("confirmOrderBtn").onclick=async ()=>{
+        const qty=Number(el("orderQty").value||"0"); if(!qty)return;
+        const prod=await getById("products",selectedProduct); if(!prod)return;
+        const cartObj={productId:prod.id,name:prod.name,img:prod.img||"",qty,unit:orderUnit};
+        db.transaction("cart","readwrite").objectStore("cart").add(cartObj).transaction.oncomplete=()=>{el("orderPromptOverlay").style.display="none";loadCart();};
+      };
+
+      // Keranjang
+      async function loadCart(){
+        const list=el("cartList"); list.innerHTML=""; const items=await getAll("cart");
+        el("cartCountTag").textContent=items.length;
+        if(!items.length){list.innerHTML="<div class='empty'>Keranjang kosong.</div>";return;}
+        items.forEach(it=>{
+          const d=document.createElement("div");d.className="cart-item";
+          d.innerHTML=`<input type="checkbox" class="cart-check" data-id="${it.id}"><img src="${it.img||placeholderSvg()}"><div class="cart-info"><div style="font-weight:700">${escapeHtml(it.name)}</div><div class="small-muted">${it.qty} ${it.unit}</div></div>`;
+          list.appendChild(d);
+        });
+      }
+      el("selectAllCart").onchange=()=>document.querySelectorAll(".cart-check").forEach(c=>c.checked=el("selectAllCart").checked);
+      el("deleteCheckedBtn").onclick=()=>{
+        const ids=[...document.querySelectorAll(".cart-check:checked")].map(c=>Number(c.dataset.id));
+        if(!ids.length)return; const tx=db.transaction("cart","readwrite").objectStore("cart"); ids.forEach(id=>tx.delete(id)); tx.transaction.oncomplete=()=>loadCart();
+      };
+      el("checkoutBtn").onclick=async ()=>{
+        const ids=[...document.querySelectorAll(".cart-check:checked")].map(c=>Number(c.dataset.id));
+        if(!ids.length){alert("Pilih item dulu.");return;}
+        const items=await getAll("cart"); let text="ORDER :\n"; items.filter(i=>ids.includes(i.id)).forEach(i=>{text+=`• ${i.name}   ${i.qty} ${i.unit}\n`;});
+        window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank");
+      };
+      el("backHomeBtn").onclick=()=>showPage("home");
+
+      // Pesanan Manual
+      el("custOrderInput").addEventListener("keydown",function(e){
+        if(e.key==="Enter"){e.preventDefault();this.value+=(this.value.endsWith("\n")||this.value==="")?"• ":"\n• ";}
+      });
+      el("addOrderBtn").onclick=()=>{
+        const name=el("custNameInput").value.trim(); const wa=el("custWaInput").value.trim(); const date=el("custDateInput").value.trim(); const orders=el("custOrderInput").value.trim();
+        if(!name||!orders)return alert("Nama & pesanan wajib");
+        const obj={name,wa,date,orders,status:"pending",dateCreated:new Date().toLocaleString()};
+        db.transaction("orders","readwrite").objectStore("orders").add(obj).transaction.oncomplete=()=>{el("custNameInput").value=el("custWaInput").value=el("custDateInput").value="";el("custOrderInput").value="";loadOrders();};
+      };
+      async function loadOrders(){
+        const list=el("orderList"); list.innerHTML=""; const orders=await getAll("orders");
+        const pending=orders.filter(o=>o.status!=="done"); const history=orders.filter(o=>o.status==="done");
+        if(!pending.length) list.innerHTML="<div class='empty'>Belum ada pesanan pending.</div>";
+        else pending.forEach(o=>{
+          const d=document.createElement("div");d.className="category";
+          d.innerHTML=`<div class="category-header">${escapeHtml(o.name)} <span class="tag">${escapeHtml(o.date||"-")}</span></div><div class="category-products"><pre>${escapeHtml(o.orders)}</pre><div><button class="btn-small btn-outline" data-id="${o.id}">Selesai</button></div></div>`;
+          d.querySelector("button").onclick=()=>{
+            const tx=db.transaction("orders","readwrite").objectStore("orders"); tx.get(o.id).onsuccess=ev=>{const rec=ev.target.result;rec.status="done";rec.dateDone=new Date().toLocaleString();tx.put(rec).onsuccess=()=>loadOrders();};
+          };
+          list.appendChild(d);
+        });
+        const hist=el("historyList"); hist.innerHTML="";
+        const last=history.slice(-5).reverse();
+        if(!last.length)hist.innerHTML="<div class='empty'>Belum ada riwayat.</div>";
+        else last.forEach(h=>{
+          const div=document.createElement("div");div.className="category";
+          div.innerHTML=`<div class="category-header">${escapeHtml(h.name)} <span class="tag">${escapeHtml(h.date||"-")}</span></div><div class="category-products"><pre>${escapeHtml(h.orders)}</pre><small>Selesai: ${escapeHtml(h.dateDone||"-")}</small></div>`;
+          hist.appendChild(div);
+        });
+      }
+
+      // History
+      el("openHistoryBtn").onclick=()=>el("historyOverlay").style.display="flex";
+      el("closeHistoryBtn").onclick=()=>el("historyOverlay").style.display="none";
+      el("clearHistoryBtn").onclick=async ()=>{
+        if(!confirm("Bersihkan riwayat?"))return;
+        const orders=await getAll("orders"); const done=orders.filter(o=>o.status==="done").map(o=>o.id);
+        const tx=db.transaction("orders","readwrite").objectStore("orders"); done.forEach(id=>tx.delete(id));
+        tx.transaction.oncomplete=()=>loadHistory();
+      };
+      async function loadHistory(){
+        const box=el("historyFullList"); box.innerHTML=""; const all=await getAll("orders"); const done=all.filter(o=>o.status==="done").reverse();
+        if(!done.length){box.innerHTML="<div class='empty'>Belum ada riwayat.</div>";return;}
+        done.forEach(o=>{
+          const d=document.createElement("div");d.style.marginBottom="10px";
+          d.innerHTML=`<b>${escapeHtml(o.name)}</b> (${o.wa||"tanpa WA"})<br>Ambil: ${escapeHtml(o.date||"-")}<br><pre>${escapeHtml(o.orders)}</pre><small>Selesai: ${escapeHtml(o.dateDone||"-")}</small><hr>`;
+          box.appendChild(d);
+        });
+      }
     }
-    closePopup(productActionOverlay);
-  };
-  deleteBtn.onclick=()=>{
-    if(confirm("Hapus produk ini?")) 
-      tx("products","readwrite").delete(currentProduct.id).onsuccess=loadCategories;
-    closePopup(productActionOverlay);
-  };
-  orderBtn.onclick=()=>{ openPopup(orderPromptOverlay); };
-
-  // ===============================
-  // Order to Cart
-  // ===============================
-  let orderUnit="";
-  document.querySelectorAll("#orderPromptOverlay [data-unit]").forEach(b=>{
-    b.onclick=()=>{ orderUnit=b.dataset.unit; };
-  });
-  confirmOrderBtn.onclick=()=>{
-    const qty=parseInt(document.getElementById("orderQty").value);
-    if(!qty||!orderUnit) return alert("Isi jumlah dan unit!");
-    const cartObj={ name:currentProduct.name, img:currentProduct.img, qty, unit:orderUnit };
-    tx("cart","readwrite").add(cartObj).onsuccess=()=>{ 
-      loadCart(); 
-      closePopup(orderPromptOverlay); 
-      closePopup(productActionOverlay); 
-    };
-  };
-
-  // ===============================
-  // Cart
-  // ===============================
-  function loadCart(){
-    cartList.innerHTML="";
-    tx("cart").getAll().onsuccess=e=>{
-      const items=e.target.result;
-      cartCountTag.textContent=items.length;
-      items.forEach(i=>{
-        const div=document.createElement("div");
-        div.className="cart-item";
-        div.innerHTML=`<input type="checkbox" class="cart-check" data-id="${i.id}"><img src="${i.img||''}"><div class="cart-info">${i.name}<br>${i.qty} ${i.unit}</div>`;
-        cartList.appendChild(div);
-      });
-    };
-  }
-  selectAllCart.onchange=()=>{ 
-    document.querySelectorAll(".cart-check").forEach(c=>c.checked=selectAllCart.checked); 
-  };
-  deleteCheckedBtn.onclick=()=>{
-    document.querySelectorAll(".cart-check:checked").forEach(c=>{
-      tx("cart","readwrite").delete(Number(c.dataset.id));
-    });
-    setTimeout(loadCart,300);
-  };
-  // === FIX: Checkout ke WhatsApp ===
-  checkoutBtn.onclick=()=>{
-    tx("cart").getAll().onsuccess = e => {
-      const items = e.target.result;
-      const checkedIds = Array.from(document.querySelectorAll(".cart-check:checked"))
-        .map(c=>Number(c.dataset.id));
-      if(checkedIds.length===0) return alert("Pilih barang dulu");
-
-      let text = "ORDER :\n";
-      items.filter(i => checkedIds.includes(i.id)).forEach(i=>{
-        text += `• ${i.name}   ${i.qty} ${i.unit}\n`;
-      });
-
-      const encoded = encodeURIComponent(text);
-      const waUrl = `https://wa.me/?text=${encoded}`;
-      window.open(waUrl, "_blank");
-    };
-  };
-  backHomeBtn.onclick=()=>showPage("home");
-
-  // ===============================
-  // Orders
-  // ===============================
-  custOrderInput.addEventListener("keydown",e=>{
-    if(e.key==="Enter"){ e.preventDefault(); custOrderInput.value+="\n• "; }
-  });
-  addOrderBtn.onclick=()=>{
-    const name=custNameInput.value.trim();
-    const wa=custWaInput.value.trim();
-    const date=custDateInput.value.trim();
-    const orders=custOrderInput.value.trim();
-    if(!name||!date||!orders) return alert("Isi nama, tanggal, dan pesanan");
-    const obj={ name, wa, date, orders, done:false, created:new Date().toLocaleString() };
-    tx("orders","readwrite").add(obj).onsuccess=()=>{ 
-      loadOrders(); 
-      custNameInput.value=custWaInput.value=custDateInput.value=custOrderInput.value=""; 
-    };
-  };
-  function loadOrders(){
-    orderList.innerHTML="";
-    tx("orders").getAll().onsuccess=e=>{
-      e.target.result.forEach(o=>{
-        const div=document.createElement("div");
-        div.className="category";
-        div.innerHTML=`<div class="category-header">${o.name} (${o.date})</div><div class="category-products"><pre>${o.orders}</pre><button class="btn-small">Selesai</button></div>`;
-        const btn=div.querySelector("button");
-        btn.onclick=()=>{
-          o.done=true; o.finished=new Date().toLocaleString();
-          tx("history","readwrite").add(o);
-          tx("orders","readwrite").delete(o.id).onsuccess=()=>{ loadOrders(); loadHistory(); };
-        };
-        orderList.appendChild(div);
-      });
-    };
-  }
-
-  // ===============================
-  // History
-  // ===============================
-  openHistoryBtn.onclick=()=>openPopup(historyOverlay);
-  closeHistoryBtn.onclick=()=>closePopup(historyOverlay);
-  clearHistoryBtn.onclick=()=>{ 
-    tx("history","readwrite").clear().onsuccess=loadHistory; 
-  };
-  function loadHistory(){
-    historyList.innerHTML="";
-    historyFullList.innerHTML="";
-    tx("history").getAll().onsuccess=e=>{
-      e.target.result.forEach(h=>{
-        const div=document.createElement("div");
-        div.className="category";
-        div.innerHTML=`<div class="category-header">${h.name} - ${h.date}</div>`;
-        historyList.appendChild(div);
-        const row=document.createElement("div");
-        row.innerHTML=`<b>${h.name}</b> (${h.date})<br><pre>${h.orders}</pre><small>Selesai: ${h.finished}</small><hr>`;
-        historyFullList.appendChild(row);
-      });
-    };
-  }
-
-  // ===============================
-  // Navigation
-  // ===============================
-  function showPage(p){
-    homePage.style.display=p==="home"?"block":"none";
-    cartPage.style.display=p==="cart"?"block":"none";
-    ordersPage.style.display=p==="orders"?"block":"none";
-    navHome.classList.toggle("active",p==="home");
-    navOrders.classList.toggle("active",p==="orders");
-  }
-  navHome.onclick=()=>showPage("home");
-  navOrders.onclick=()=>showPage("orders");
-  cartIconBtn.onclick=()=>showPage("cart");
+  })();
   </script>
 </body>
 </html>
