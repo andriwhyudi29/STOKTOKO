@@ -86,24 +86,76 @@
       </div>
     </section>
 
-    <!-- ORDERS PAGE -->
+    <!-- ======================
+         PART PESANAN: DI-GANTI SESUAI PERMINTAAN
+    ====================== -->
+    <!-- PESANAN - MULAI -->
     <section id="ordersPage" style="display:none">
-      <h3>📋 Pesanan Pending</h3>
-      <div id="orderList"></div>
-
-      <h3 style="margin-top:18px">➕ Tambah Pesanan Manual</h3>
-      <input id="custNameInput" class="input" placeholder="Nama Pelanggan">
-      <input id="custWaInput" class="input" placeholder="Nomor WA (opsional)">
-      <input id="custDateInput" class="input" placeholder="Tanggal/Hari Pengambilan">
-      <textarea id="custOrderInput" rows="4" class="input" placeholder="Tulis pesanan; tekan Enter untuk bullet"></textarea>
-      <button id="addOrderBtn" class="btn" style="margin-top:10px;width:100%">+ Tambah Pesanan</button>
-
-      <div style="margin-top:18px; display:flex; justify-content:space-between; align-items:center">
-        <h3>📜 Riwayat</h3>
-        <button id="openHistoryBtn" class="btn-small btn-outline">Lihat Semua</button>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3>📋 Pesanan</h3>
+        <button id="openHistoryBtn" title="Riwayat" style="background:none; border:none; font-size:20px; cursor:pointer;">📜</button>
       </div>
-      <div id="historyList" style="margin-top:8px"></div>
+
+      <button id="addOrderBtn" class="btn" style="margin:10px 0;width:100%">➕ Tambah Pesanan</button>
+      
+      <div id="orderList"></div>
     </section>
+
+    <!-- Popup Tambah/Edit Pesanan -->
+    <div id="orderOverlay" class="overlay">
+      <div class="popup">
+        <h3 id="orderFormTitle">Tambah Pesanan</h3>
+        <input id="orderIdHidden" type="hidden">
+        <input id="custNameInput" class="input" placeholder="Nama Pelanggan">
+        <input id="custWaInput" class="input" placeholder="Nomor WA (opsional)">
+        <input id="custDateInput" class="input" placeholder="Tanggal Pengambilan">
+        <textarea id="custOrderInput" rows="4" class="input" placeholder="• Barang. jumlah"></textarea>
+        <div class="row" style="margin-top:12px">
+          <button id="saveOrderBtn" class="btn" style="flex:1">💾 Simpan</button>
+          <button id="cancelOrderBtn" class="btn btn-secondary" style="flex:1">Batal</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Popup Detail Pesanan (Pending) -->
+    <div id="orderDetailOverlay" class="overlay">
+      <div class="popup">
+        <h3>Detail Pesanan</h3>
+        <div id="orderDetailContent" style="margin-top:8px"></div>
+        <div class="row" style="margin-top:12px">
+          <button id="detailFinishBtn" class="btn-small btn-outline" style="flex:1">Selesai</button>
+          <button id="detailEditBtn" class="btn-small btn-outline" style="flex:1">Edit</button>
+          <button id="detailDeleteBtn" class="btn-small btn-secondary" style="flex:1">Batal</button>
+        </div>
+        <div style="margin-top:8px">
+          <button id="detailCloseBtn" class="btn" style="width:100%">Tutup</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Popup Riwayat Pesanan -->
+    <div id="historyOverlay" class="overlay">
+      <div class="popup">
+        <h3>📜 Riwayat Pesanan</h3>
+        <div id="historyList" style="margin-top:10px; max-height:300px; overflow:auto;"></div>
+        <div style="margin-top:12px">
+          <button id="closeHistoryBtn" class="btn" style="width:100%">Tutup</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Popup Detail Riwayat (readonly) -->
+    <div id="historyDetailOverlay" class="overlay">
+      <div class="popup">
+        <h3>Detail Riwayat</h3>
+        <div id="historyDetailContent" style="margin-top:8px"></div>
+        <div style="margin-top:12px">
+          <button id="historyDetailCloseBtn" class="btn" style="width:100%">Tutup</button>
+        </div>
+      </div>
+    </div>
+    <!-- PESANAN - SELESAI -->
+
   </main>
 
   <!-- BOTTOM NAVIGATION -->
@@ -111,8 +163,9 @@
     <div id="navHome" class="nav-item active">🏠 Home</div>
     <div id="navOrders" class="nav-item">📋 Pesanan</div>
   </div>
+
   <!-- ======================
-       PART 3: POPUPS
+       POPUPS PRODUK LAINNYA (tetap sama)
   ====================== -->
 
   <!-- Add / Edit Product -->
@@ -150,7 +203,7 @@
     </div>
   </div>
 
-  <!-- Order Prompt -->
+  <!-- Order Prompt (produk -> keranjang) -->
   <div id="orderPromptOverlay" class="overlay">
     <div class="popup" id="orderPromptPopup">
       <h3>Order Produk</h3>
@@ -167,19 +220,8 @@
     </div>
   </div>
 
-  <!-- History Popup -->
-  <div id="historyOverlay" class="overlay">
-    <div class="popup">
-      <h3>Riwayat Pesanan</h3>
-      <div id="historyFullList" style="max-height:320px; overflow:auto; margin-top:10px"></div>
-      <div style="display:flex; gap:8px; margin-top:12px">
-        <button id="clearHistoryBtn" class="btn btn-secondary" style="flex:1">🗑️ Bersihkan</button>
-        <button id="closeHistoryBtn" class="btn" style="flex:1">Tutup</button>
-      </div>
-    </div>
-  </div>
   <!-- ======================
-       PART 4: SCRIPT
+       SCRIPT (produk + cart tetap asli; pesanan diganti)
   ====================== -->
   <script>
   (function(){
@@ -228,7 +270,7 @@
       }
 
       // Tambah Produk
-      el("addProductBtn").onclick=()=>{
+      el("addProductBtn").onclick=()=>{ 
         el("productIdHidden").value="";
         el("addEditTitle").textContent="Tambah Produk";
         el("addProductOverlay").style.display="flex";
@@ -336,56 +378,153 @@
       };
       el("backHomeBtn").onclick=()=>showPage("home");
 
-      // Pesanan Manual
-      el("custOrderInput").addEventListener("keydown",function(e){
-        if(e.key==="Enter"){e.preventDefault();this.value+=(this.value.endsWith("\n")||this.value==="")?"• ":"\n• ";}
-      });
-      el("addOrderBtn").onclick=()=>{
-        const name=el("custNameInput").value.trim(); const wa=el("custWaInput").value.trim(); const date=el("custDateInput").value.trim(); const orders=el("custOrderInput").value.trim();
-        if(!name||!orders)return alert("Nama & pesanan wajib");
-        const obj={name,wa,date,orders,status:"pending",dateCreated:new Date().toLocaleString()};
-        db.transaction("orders","readwrite").objectStore("orders").add(obj).transaction.oncomplete=()=>{el("custNameInput").value=el("custWaInput").value=el("custDateInput").value="";el("custOrderInput").value="";loadOrders();};
+      /* ===================
+         PESANAN: LOGIKA BARU
+         (Menggantikan bagian pesanan lama; tidak merubah fitur lain)
+         =================== */
+
+      // Tombol tambah pesanan (di halaman Pesanan)
+      el("addOrderBtn").onclick = ()=>{
+        el("orderIdHidden").value = "";
+        el("custNameInput").value = "";
+        el("custWaInput").value = "";
+        el("custDateInput").value = "";
+        el("custOrderInput").value = "";
+        el("orderFormTitle").textContent = "Tambah Pesanan";
+        el("orderOverlay").style.display = "flex";
+   };
+
+      // Cancel / tutup form pesanan
+      el("cancelOrderBtn").onclick = ()=> el("orderOverlay").style.display = "none";
+
+      // Simpan pesanan (tambah / edit)
+      el("saveOrderBtn").onclick = async ()=>{
+        const id = el("orderIdHidden").value;
+        const name = el("custNameInput").value.trim();
+        const wa = el("custWaInput").value.trim();
+        const date = el("custDateInput").value.trim();
+        const orders = el("custOrderInput").value.trim();
+        if(!name || !orders){ alert("Nama & pesanan wajib"); return; }
+
+        const storeObj = db.transaction("orders","readwrite").objectStore("orders");
+
+        if(id){
+          // edit: ambil record dulu agar tetap menyimpan dateCreated/status jika ada
+          const rec = await getById("orders", Number(id));
+          if(!rec) { alert("Data tidak ditemukan"); el("orderOverlay").style.display="none"; loadOrders(); return; }
+          rec.name = name; rec.wa = wa; rec.date = date; rec.orders = orders;
+          storeObj.put(rec);
+          storeObj.transaction.oncomplete = ()=>{ el("orderOverlay").style.display="none"; loadOrders(); };
+        } else {
+          const obj = {name, wa, date, orders, status:"pending", dateCreated:new Date().toLocaleString()};
+          storeObj.add(obj);
+          storeObj.transaction.oncomplete = ()=>{ el("orderOverlay").style.display="none"; loadOrders(); };
+        }
       };
+
+      // Load daftar pesanan (pending)
       async function loadOrders(){
-        const list=el("orderList"); list.innerHTML=""; const orders=await getAll("orders");
-        const pending=orders.filter(o=>o.status!=="done"); const history=orders.filter(o=>o.status==="done");
-        if(!pending.length) list.innerHTML="<div class='empty'>Belum ada pesanan pending.</div>";
-        else pending.forEach(o=>{
-          const d=document.createElement("div");d.className="category";
-          d.innerHTML=`<div class="category-header">${escapeHtml(o.name)} <span class="tag">${escapeHtml(o.date||"-")}</span></div><div class="category-products"><pre>${escapeHtml(o.orders)}</pre><div><button class="btn-small btn-outline" data-id="${o.id}">Selesai</button></div></div>`;
-          d.querySelector("button").onclick=()=>{
-            const tx=db.transaction("orders","readwrite").objectStore("orders"); tx.get(o.id).onsuccess=ev=>{const rec=ev.target.result;rec.status="done";rec.dateDone=new Date().toLocaleString();tx.put(rec).onsuccess=()=>loadOrders();};
-          };
+        const list = el("orderList");
+        list.innerHTML = "";
+        const orders = await getAll("orders");
+        const pending = orders.filter(o => o.status !== "done");
+        if(!pending.length){ list.innerHTML = "<div class='empty'>Belum ada pesanan.</div>"; return; }
+        // tampilkan paling terbaru di atas
+        pending.reverse().forEach(o=>{
+          const d = document.createElement("div");
+          d.className = "category";
+          d.innerHTML = `<div class="category-header">${escapeHtml(o.name)} <span class="tag">${escapeHtml(o.date||"-")}</span></div>`;
+          d.onclick = ()=> openOrderDetail(o.id);
           list.appendChild(d);
-        });
-        const hist=el("historyList"); hist.innerHTML="";
-        const last=history.slice(-5).reverse();
-        if(!last.length)hist.innerHTML="<div class='empty'>Belum ada riwayat.</div>";
-        else last.forEach(h=>{
-          const div=document.createElement("div");div.className="category";
-          div.innerHTML=`<div class="category-header">${escapeHtml(h.name)} <span class="tag">${escapeHtml(h.date||"-")}</span></div><div class="category-products"><pre>${escapeHtml(h.orders)}</pre><small>Selesai: ${escapeHtml(h.dateDone||"-")}</small></div>`;
-          hist.appendChild(div);
         });
       }
 
-      // History
-      el("openHistoryBtn").onclick=()=>el("historyOverlay").style.display="flex";
-      el("closeHistoryBtn").onclick=()=>el("historyOverlay").style.display="none";
-      el("clearHistoryBtn").onclick=async ()=>{
-        if(!confirm("Bersihkan riwayat?"))return;
-        const orders=await getAll("orders"); const done=orders.filter(o=>o.status==="done").map(o=>o.id);
-        const tx=db.transaction("orders","readwrite").objectStore("orders"); done.forEach(id=>tx.delete(id));
-        tx.transaction.oncomplete=()=>loadHistory();
+      // Buka popup detail pesanan (pending)
+      async function openOrderDetail(id){
+        const o = await getById("orders", id);
+        if(!o) return alert("Pesanan tidak ditemukan");
+        const content = el("orderDetailContent");
+        content.innerHTML = `<b>${escapeHtml(o.name)}</b><br>WA: ${escapeHtml(o.wa||"-")}<br>Ambil: ${escapeHtml(o.date||"-")}<br><pre style="margin-top:8px">${escapeHtml(o.orders)}</pre>`;
+        // simpan id di atribut tombol supaya handler tahu id yang dipakai
+        el("detailFinishBtn").dataset.id = o.id;
+        el("detailEditBtn").dataset.id = o.id;
+        el("detailDeleteBtn").dataset.id = o.id;
+        el("orderDetailOverlay").style.display = "flex";
+      }
+
+      // Tombol di detail: Selesai
+      el("detailFinishBtn").onclick = async function(){
+        const id = Number(this.dataset.id);
+        if(!confirm("Tandai pesanan ini sebagai selesai?")) return;
+        const tx = db.transaction("orders","readwrite").objectStore("orders");
+        tx.get(id).onsuccess = e=>{
+          const rec = e.target.result;
+          if(!rec) return;
+          rec.status = "done";
+          rec.dateDone = new Date().toLocaleString();
+          tx.put(rec).onsuccess = ()=>{ el("orderDetailOverlay").style.display="none"; loadOrders(); };
+        };
       };
+
+      // Tombol di detail: Edit
+      el("detailEditBtn").onclick = async function(){
+        const id = Number(this.dataset.id);
+        const o = await getById("orders", id);
+        if(!o) return alert("Data tidak ditemukan");
+        el("orderIdHidden").value = o.id;
+        el("custNameInput").value = o.name;
+        el("custWaInput").value = o.wa || "";
+        el("custDateInput").value = o.date || "";
+        el("custOrderInput").value = o.orders || "";
+        el("orderFormTitle").textContent = "Edit Pesanan";
+        el("orderDetailOverlay").style.display = "none";
+        el("orderOverlay").style.display = "flex";
+      };
+
+      // Tombol di detail: Hapus / Batal
+      el("detailDeleteBtn").onclick = function(){
+        const id = Number(this.dataset.id);
+        if(!confirm("Hapus pesanan ini?")) return;
+        db.transaction("orders","readwrite").objectStore("orders").delete(id).transaction.oncomplete = ()=>{
+          el("orderDetailOverlay").style.display = "none";
+          loadOrders();
+        };
+      };
+
+      // Tutup detail
+      el("detailCloseBtn").onclick = ()=> el("orderDetailOverlay").style.display = "none";
+
+      /* RIWAYAT (done) */
+      el("openHistoryBtn").onclick = ()=>{
+        loadHistory();
+        el("historyOverlay").style.display = "flex";
+      };
+      el("closeHistoryBtn").onclick = ()=> el("historyOverlay").style.display = "none";
+      el("historyDetailCloseBtn").onclick = ()=> el("historyDetailOverlay").style.display = "none";
+
       async function loadHistory(){
-        const box=el("historyFullList"); box.innerHTML=""; const all=await getAll("orders"); const done=all.filter(o=>o.status==="done").reverse();
-        if(!done.length){box.innerHTML="<div class='empty'>Belum ada riwayat.</div>";return;}
+        const box = el("historyList"); box.innerHTML = "";
+        const all = await getAll("orders");
+        const done = all.filter(o=>o.status==="done").reverse();
+        if(!done.length){ box.innerHTML = "<div class='empty'>Belum ada riwayat.</div>"; return; }
         done.forEach(o=>{
-          const d=document.createElement("div");d.style.marginBottom="10px";
-          d.innerHTML=`<b>${escapeHtml(o.name)}</b> (${o.wa||"tanpa WA"})<br>Ambil: ${escapeHtml(o.date||"-")}<br><pre>${escapeHtml(o.orders)}</pre><small>Selesai: ${escapeHtml(o.dateDone||"-")}</small><hr>`;
+          const d = document.createElement("div");
+          d.className = "category";
+          d.innerHTML = `<div class="category-header">${escapeHtml(o.name)} <span class="tag">${escapeHtml(o.date||"-")}</span></div>`;
+          d.onclick = ()=> openHistoryDetail(o);
           box.appendChild(d);
         });
       }
+
+      function openHistoryDetail(o){
+        const box = el("historyDetailContent");
+        box.innerHTML = `<b>${escapeHtml(o.name)}</b><br>WA: ${escapeHtml(o.wa||"-")}<br>Ambil: ${escapeHtml(o.date||"-")}<br><small>Selesai: ${escapeHtml(o.dateDone||"-")}</small><pre style="margin-top:8px">${escapeHtml(o.orders)}</pre>`;
+        el("historyDetailOverlay").style.display = "flex";
+      }
+
+      /* end pesanan logic */
+
+      // Pesanan dan riwayat dipanggil saat initApp() di atas
     }
   })();
   </script>
