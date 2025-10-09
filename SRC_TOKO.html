@@ -44,12 +44,40 @@
     .empty {text-align:center; color:#777; padding:20px;}
     pre {white-space:pre-wrap; font-family:inherit;}
   </style>
-</head>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+<!-- ADDED: Dark/Light theme variables and overrides -->
+<style>
+:root{--bg-dark:#1E1E1E;--text-dark:#F1FAEE;--card-dark:#2B2B2B;--accent:#E63946;--accent2:#F77F00;--border-dark:#444}
+:root{--bg-light:#FAF3E0;--text-light:#1E1E1E;--card-light:#FFFFFF;--border-light:#DDD}
+
+body.theme-dark{background:var(--bg-dark);color:var(--text-dark)}
+body.theme-dark .category{background:var(--card-dark)}
+body.theme-dark .category-header{background:#323232;color:var(--text-dark)}
+body.theme-dark .popup{background:var(--card-dark);color:var(--text-dark)}
+body.theme-dark .overlay{background:rgba(0,0,0,0.6)}
+body.theme-dark header{background:var(--accent);color:#fff}
+body.theme-dark .btn{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff}
+
+body.theme-light{background:var(--bg-light);color:var(--text-light)}
+body.theme-light .category{background:var(--card-light)}
+body.theme-light .category-header{background:#f3f3f3;color:var(--text-light)}
+body.theme-light .popup{background:var(--card-light);color:var(--text-light)}
+body.theme-light .overlay{background:rgba(0,0,0,0.3)}
+body.theme-light header{background:#c62828;color:#fff}
+body.theme-light .btn{background:#c62828;color:#fff}
+
+#themeToggleBtn{background:transparent;border:1px solid rgba(255,255,255,0.12);color:inherit;border-radius:8px;padding:6px 8px;cursor:pointer;margin-left:8px}
+body.theme-light #themeToggleBtn{border:1px solid rgba(0,0,0,0.08)}
+</style>
+<!-- END ADDED -->
+
+</head></head>
 <body>
   <!-- HEADER -->
   <header>
     <div class="left">📦 <span>STOKTOKO</span></div>
-    <div class="right">
+    <div class="right">      <button id="themeToggleBtn" title="Toggle tema">🌙</button>
       <button id="cartIconBtn" title="Keranjang">🛒</button>
       <span id="cartCountTag">0</span>
     </div>
@@ -528,5 +556,25 @@
     }
   })();
   </script>
+
+<!-- ADDED: theme toggle script -->
+<script>
+(function(){
+  try{
+    const btn = document.getElementById('themeToggleBtn');
+    const body = document.body;
+    const saved = localStorage.getItem('stoktoko_theme');
+    if(saved === 'light'){ body.classList.remove('theme-dark'); body.classList.add('theme-light'); btn.textContent = '☀️'; } else { body.classList.remove('theme-light'); body.classList.add('theme-dark'); btn.textContent = '🌙'; }
+    btn.addEventListener('click', function(){
+      if(body.classList.contains('theme-light')){
+        body.classList.remove('theme-light'); body.classList.add('theme-dark'); btn.textContent = '🌙'; localStorage.setItem('stoktoko_theme','dark');
+      } else {
+        body.classList.remove('theme-dark'); body.classList.add('theme-light'); btn.textContent = '☀️'; localStorage.setItem('stoktoko_theme','light');
+      }
+    });
+  }catch(e){ console.warn('theme toggle init error', e); }
+})();
+</script>
+<!-- END ADDED -->
 </body>
 </html>
