@@ -1,10 +1,11 @@
 <!DOCTYPE html>
+
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>STOKTOKO</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
+<meta charset="utf-8"/>
+<title>STOKTOKO</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<style>
     body {font-family: Arial, sans-serif; margin:0; background:#fff; color:#333;}
     header {display:flex; justify-content:space-between; align-items:center; padding:12px; background:#c62828; color:#fff;}
     header .right {position:relative;}
@@ -44,8 +45,7 @@
     .empty {text-align:center; color:#777; padding:20px;}
     pre {white-space:pre-wrap; font-family:inherit;}
   </style>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&amp;display=swap" rel="stylesheet"/>
 <!-- ADDED: Dark/Light theme variables and overrides -->
 <style>
 :root{--bg-dark:#1E1E1E;--text-dark:#F1FAEE;--card-dark:#2B2B2B;--accent:#E63946;--accent2:#F77F00;--border-dark:#444}
@@ -71,187 +71,175 @@ body.theme-light .btn{background:#c62828;color:#fff}
 body.theme-light #themeToggleBtn{border:1px solid rgba(0,0,0,0.08)}
 </style>
 <!-- END ADDED -->
-
-</head></head>
+</head>
 <body>
-  <!-- HEADER -->
-  <header>
-    <div class="left">📦 <span>STOKTOKO</span></div>
-    <div class="right">      <button id="themeToggleBtn" title="Toggle tema">🌙</button>
-      <button id="cartIconBtn" title="Keranjang">🛒</button>
-      <span id="cartCountTag">0</span>
-    </div>
-  </header>
-
-  <!-- MAIN CONTENT -->
-  <main>
-    <!-- HOME PAGE -->
-    <section id="homePage">
-      <div class="row" style="margin-bottom:14px">
-        <button id="addProductBtn" class="btn" style="flex:1">➕ Tambah Produk</button>
-        <button id="outOfStockBtn" class="btn btn-secondary" style="flex:1">⚠️ Barang Kosong</button>
-      </div>
-
-      <h3>📂 Daftar Kategori</h3>
-      <div id="categoriesList">
-        <div class="empty">Belum ada produk.</div>
-      </div>
-    </section>
-
-    <!-- CART PAGE -->
-    <section id="cartPage" style="display:none">
-      <h3>🛒 Keranjang</h3>
-      <div style="margin:8px 0">
-        <label><input type="checkbox" id="selectAllCart"> Pilih Semua</label>
-      </div>
-      <div id="cartList"></div>
-      <div class="row" style="margin-top:14px">
-        <button id="checkoutBtn" class="btn" style="flex:1">Checkout → WA</button>
-        <button id="deleteCheckedBtn" class="btn btn-secondary" style="flex:1">Hapus</button>
-      </div>
-      <div style="margin-top:12px">
-        <button id="backHomeBtn" class="btn btn-outline" style="width:100%">⬅️ Kembali</button>
-      </div>
-    </section>
-
-    <!-- ======================
+<!-- HEADER -->
+<header>
+<div class="left">📦 <span>STOKTOKO</span></div>
+<div class="right"> <button id="themeToggleBtn" title="Toggle tema">🌙</button>
+<button id="cartIconBtn" title="Keranjang">🛒</button>
+<span id="cartCountTag">0</span>
+</div>
+</header>
+<!-- MAIN CONTENT -->
+<main>
+<!-- HOME PAGE -->
+<section id="homePage">
+<div class="row" style="margin-bottom:14px">
+<button class="btn" id="addProductBtn" style="flex:1">➕ Tambah Produk</button>
+<button class="btn btn-secondary" id="outOfStockBtn" style="flex:1">⚠️ Barang Kosong</button>
+</div>
+<h3>📂 Daftar Kategori</h3>
+<div id="categoriesList">
+<div class="empty">Belum ada produk.</div>
+</div>
+</section>
+<!-- CART PAGE -->
+<section id="cartPage" style="display:none">
+<h3>🛒 Keranjang</h3>
+<div style="margin:8px 0">
+<label><input id="selectAllCart" type="checkbox"/> Pilih Semua</label>
+</div>
+<div id="cartList"></div>
+<div class="row" style="margin-top:14px">
+<button class="btn" id="checkoutBtn" style="flex:1">Checkout → WA</button>
+<button class="btn btn-secondary" id="deleteCheckedBtn" style="flex:1">Hapus</button>
+</div>
+<div style="margin-top:12px">
+<button class="btn btn-outline" id="backHomeBtn" style="width:100%">⬅️ Kembali</button>
+</div>
+</section><section id="outOfStockPage" style="display:none">
+<div style="margin-bottom:12px;">
+<button class="btn btn-outline" id="backFromOutOfStockBtn">⬅️ Kembali ke Home</button>
+</div>
+<h3>⚠️ Produk Kosong</h3>
+<div id="outOfStockList"></div>
+</section>
+<!-- ======================
          PART PESANAN: DI-GANTI SESUAI PERMINTAAN
     ====================== -->
-    <!-- PESANAN - MULAI -->
-    <section id="ordersPage" style="display:none">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h3>📋 Pesanan</h3>
-        <button id="openHistoryBtn" title="Riwayat" style="background:none; border:none; font-size:20px; cursor:pointer;">📜</button>
-      </div>
-
-      <button id="addOrderBtn" class="btn" style="margin:10px 0;width:100%">➕ Tambah Pesanan</button>
-      
-      <div id="orderList"></div>
-    </section>
-
-    <!-- Popup Tambah/Edit Pesanan -->
-    <div id="orderOverlay" class="overlay">
-      <div class="popup">
-        <h3 id="orderFormTitle">Tambah Pesanan</h3>
-        <input id="orderIdHidden" type="hidden">
-        <input id="custNameInput" class="input" placeholder="Nama Pelanggan">
-        <input id="custWaInput" class="input" placeholder="Nomor WA (opsional)">
-        <input id="custDateInput" class="input" placeholder="Tanggal Pengambilan">
-        <textarea id="custOrderInput" rows="4" class="input" placeholder="• Barang. jumlah"></textarea>
-        <div class="row" style="margin-top:12px">
-          <button id="saveOrderBtn" class="btn" style="flex:1">💾 Simpan</button>
-          <button id="cancelOrderBtn" class="btn btn-secondary" style="flex:1">Batal</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Popup Detail Pesanan (Pending) -->
-    <div id="orderDetailOverlay" class="overlay">
-      <div class="popup">
-        <h3>Detail Pesanan</h3>
-        <div id="orderDetailContent" style="margin-top:8px"></div>
-        <div class="row" style="margin-top:12px">
-          <button id="detailFinishBtn" class="btn-small btn-outline" style="flex:1">Selesai</button>
-          <button id="detailEditBtn" class="btn-small btn-outline" style="flex:1">Edit</button>
-          <button id="detailDeleteBtn" class="btn-small btn-secondary" style="flex:1">Batal</button>
-        </div>
-        <div style="margin-top:8px">
-          <button id="detailCloseBtn" class="btn" style="width:100%">Tutup</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Popup Riwayat Pesanan -->
-    <div id="historyOverlay" class="overlay">
-      <div class="popup">
-        <h3>📜 Riwayat Pesanan</h3>
-        <div id="historyList" style="margin-top:10px; max-height:300px; overflow:auto;"></div>
-        <div style="margin-top:12px">
-          <button id="closeHistoryBtn" class="btn" style="width:100%">Tutup</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Popup Detail Riwayat (readonly) -->
-    <div id="historyDetailOverlay" class="overlay">
-      <div class="popup">
-        <h3>Detail Riwayat</h3>
-        <div id="historyDetailContent" style="margin-top:8px"></div>
-        <div style="margin-top:12px">
-          <button id="historyDetailCloseBtn" class="btn" style="width:100%">Tutup</button>
-        </div>
-      </div>
-    </div>
-    <!-- PESANAN - SELESAI -->
-
-  </main>
-
-  <!-- BOTTOM NAVIGATION -->
-  <div class="bottom-nav">
-    <div id="navHome" class="nav-item active">🏠 Home</div>
-    <div id="navOrders" class="nav-item">📋 Pesanan</div>
-  </div>
-
-  <!-- ======================
+<!-- PESANAN - MULAI -->
+<section id="ordersPage" style="display:none">
+<div style="display:flex; justify-content:space-between; align-items:center;">
+<h3>📋 Pesanan</h3>
+<button id="openHistoryBtn" style="background:none; border:none; font-size:20px; cursor:pointer;" title="Riwayat">📜</button>
+</div>
+<button class="btn" id="addOrderBtn" style="margin:10px 0;width:100%">➕ Tambah Pesanan</button>
+<div id="orderList"></div>
+</section>
+<!-- Popup Tambah/Edit Pesanan -->
+<div class="overlay" id="orderOverlay">
+<div class="popup">
+<h3 id="orderFormTitle">Tambah Pesanan</h3>
+<input id="orderIdHidden" type="hidden"/>
+<input class="input" id="custNameInput" placeholder="Nama Pelanggan"/>
+<input class="input" id="custWaInput" placeholder="Nomor WA (opsional)"/>
+<input class="input" id="custDateInput" placeholder="Tanggal Pengambilan"/>
+<textarea class="input" id="custOrderInput" placeholder="• Barang. jumlah" rows="4"></textarea>
+<div class="row" style="margin-top:12px">
+<button class="btn" id="saveOrderBtn" style="flex:1">💾 Simpan</button>
+<button class="btn btn-secondary" id="cancelOrderBtn" style="flex:1">Batal</button>
+</div>
+</div>
+</div>
+<!-- Popup Detail Pesanan (Pending) -->
+<div class="overlay" id="orderDetailOverlay">
+<div class="popup">
+<h3>Detail Pesanan</h3>
+<div id="orderDetailContent" style="margin-top:8px"></div>
+<div class="row" style="margin-top:12px">
+<button class="btn-small btn-outline" id="detailFinishBtn" style="flex:1">Selesai</button>
+<button class="btn-small btn-outline" id="detailEditBtn" style="flex:1">Edit</button>
+<button class="btn-small btn-secondary" id="detailDeleteBtn" style="flex:1">Batal</button>
+</div>
+<div style="margin-top:8px">
+<button class="btn" id="detailCloseBtn" style="width:100%">Tutup</button>
+</div>
+</div>
+</div>
+<!-- Popup Riwayat Pesanan -->
+<div class="overlay" id="historyOverlay">
+<div class="popup">
+<h3>📜 Riwayat Pesanan</h3>
+<div id="historyList" style="margin-top:10px; max-height:300px; overflow:auto;"></div>
+<div style="margin-top:12px">
+<button class="btn" id="closeHistoryBtn" style="width:100%">Tutup</button>
+</div>
+</div>
+</div>
+<!-- Popup Detail Riwayat (readonly) -->
+<div class="overlay" id="historyDetailOverlay">
+<div class="popup">
+<h3>Detail Riwayat</h3>
+<div id="historyDetailContent" style="margin-top:8px"></div>
+<div style="margin-top:12px">
+<button class="btn" id="historyDetailCloseBtn" style="width:100%">Tutup</button>
+</div>
+</div>
+</div>
+<!-- PESANAN - SELESAI -->
+</main>
+<!-- BOTTOM NAVIGATION -->
+<div class="bottom-nav">
+<div class="nav-item active" id="navHome">🏠 Home</div>
+<div class="nav-item" id="navOrders">📋 Pesanan</div>
+</div>
+<!-- ======================
        POPUPS PRODUK LAINNYA (tetap sama)
   ====================== -->
-
-  <!-- Add / Edit Product -->
-  <div id="addProductOverlay" class="overlay">
-    <div class="popup">
-      <h3 id="addEditTitle">Tambah Produk</h3>
-      <input id="productIdHidden" type="hidden">
-      <input id="productName" class="input" placeholder="Nama Produk">
-      <input id="productCategory" class="input" placeholder="Kategori">
-      <input id="productStock" class="input" type="number" placeholder="Stok (angka)">
-      <select id="productUnit" class="input">
-        <option value="PCS">PCS</option>
-        <option value="BAL">BAL</option>
-        <option value="DUS">DUS</option>
-      </select>
-      <input id="productImage" class="input" type="file" accept="image/*">
-      <div class="row" style="margin-top:12px">
-        <button id="saveProductBtn" class="btn" style="flex:1">💾 Simpan</button>
-        <button id="cancelProductBtn" class="btn btn-secondary" style="flex:1">Batal</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Product Actions (+) -->
-  <div id="productActionOverlay" class="overlay">
-    <div class="popup">
-      <h3>Aksi Produk</h3>
-      <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px">
-        <button id="editBtn" class="btn btn-outline">✏️ Edit Produk</button>
-        <button id="stockBtn" class="btn btn-outline">📦 Update Stok</button>
-        <button id="deleteBtn" class="btn btn-outline">🗑️ Hapus Produk</button>
-        <button id="orderBtn" class="btn btn-outline">🛒 Order Produk</button>
-        <button id="closeActionsBtn" class="btn btn-secondary">Tutup</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Order Prompt (produk -> keranjang) -->
-  <div id="orderPromptOverlay" class="overlay">
-    <div class="popup" id="orderPromptPopup">
-      <h3>Order Produk</h3>
-      <input id="orderQty" class="input" type="number" placeholder="Jumlah">
-      <div style="display:flex; gap:8px; margin-top:10px">
-        <button class="btn-small btn-outline" data-unit="PCS">PCS</button>
-        <button class="btn-small btn-outline" data-unit="BAL">BAL</button>
-        <button class="btn-small btn-outline" data-unit="DUS">DUS</button>
-      </div>
-      <div style="display:flex; gap:8px; margin-top:12px">
-        <button id="confirmOrderBtn" class="btn" style="flex:1">OK</button>
-        <button id="cancelOrderBtn" class="btn btn-secondary" style="flex:1">Batal</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ======================
+<!-- Add / Edit Product -->
+<div class="overlay" id="addProductOverlay">
+<div class="popup">
+<h3 id="addEditTitle">Tambah Produk</h3>
+<input id="productIdHidden" type="hidden"/>
+<input class="input" id="productName" placeholder="Nama Produk"/>
+<input class="input" id="productCategory" placeholder="Kategori"/>
+<input class="input" id="productStock" placeholder="Stok (angka)" type="number"/>
+<select class="input" id="productUnit">
+<option value="PCS">PCS</option>
+<option value="BAL">BAL</option>
+<option value="DUS">DUS</option>
+</select>
+<input accept="image/*" class="input" id="productImage" type="file"/>
+<div class="row" style="margin-top:12px">
+<button class="btn" id="saveProductBtn" style="flex:1">💾 Simpan</button>
+<button class="btn btn-secondary" id="cancelProductBtn" style="flex:1">Batal</button>
+</div>
+</div>
+</div>
+<!-- Product Actions (+) -->
+<div class="overlay" id="productActionOverlay">
+<div class="popup">
+<h3>Aksi Produk</h3>
+<div style="display:flex; flex-direction:column; gap:8px; margin-top:8px">
+<button class="btn btn-outline" id="editBtn">✏️ Edit Produk</button>
+<button class="btn btn-outline" id="stockBtn">📦 Update Stok</button>
+<button class="btn btn-outline" id="deleteBtn">🗑️ Hapus Produk</button>
+<button class="btn btn-outline" id="orderBtn">🛒 Order Produk</button>
+<button class="btn btn-secondary" id="closeActionsBtn">Tutup</button>
+</div>
+</div>
+</div>
+<!-- Order Prompt (produk -> keranjang) -->
+<div class="overlay" id="orderPromptOverlay">
+<div class="popup" id="orderPromptPopup">
+<h3>Order Produk</h3>
+<input class="input" id="orderQty" placeholder="Jumlah" type="number"/>
+<div style="display:flex; gap:8px; margin-top:10px">
+<button class="btn-small btn-outline" data-unit="PCS">PCS</button>
+<button class="btn-small btn-outline" data-unit="BAL">BAL</button>
+<button class="btn-small btn-outline" data-unit="DUS">DUS</button>
+</div>
+<div style="display:flex; gap:8px; margin-top:12px">
+<button class="btn" id="confirmOrderBtn" style="flex:1">OK</button>
+<button class="btn btn-secondary" id="cancelOrderBtn" style="flex:1">Batal</button>
+</div>
+</div>
+</div>
+<!-- ======================
        SCRIPT (produk + cart tetap asli; pesanan diganti)
   ====================== -->
-  <script>
+<script>
   (function(){
     let db;
     const DB_NAME = "stoktokoDB";
@@ -293,6 +281,7 @@ body.theme-light #themeToggleBtn{border:1px solid rgba(0,0,0,0.08)}
         el("homePage").style.display=(p==="home")?"block":"none";
         el("cartPage").style.display=(p==="cart")?"block":"none";
         el("ordersPage").style.display=(p==="orders")?"block":"none";
+        el("outOfStockPage").style.display=(p==="outstock")?"block":"none";
         el("navHome").classList.toggle("active",p==="home");
         el("navOrders").classList.toggle("active",p==="orders");
       }
@@ -324,7 +313,7 @@ body.theme-light #themeToggleBtn{border:1px solid rgba(0,0,0,0.08)}
       };
 
       // Barang Kosong
-      el("outOfStockBtn").onclick=()=>loadCategories(true);
+      el("outOfStockBtn").onclick=()=>{showPage("outstock");loadOutOfStockProducts();};
 
       // Load Kategori + Produk
       async function loadCategories(outOnly=false){
@@ -353,7 +342,31 @@ body.theme-light #themeToggleBtn{border:1px solid rgba(0,0,0,0.08)}
         });
       }
 
-      // Aksi Produk (+)
+      
+      async function loadOutOfStockProducts(){
+        const list = el("outOfStockList");
+        list.innerHTML = "";
+        const products = await getAll("products");
+        const emptyProducts = products.filter(p => p.stock <= 0);
+        if(!emptyProducts.length){
+          list.innerHTML = "<div class='empty'>Tidak ada produk kosong.</div>";
+          return;
+        }
+        emptyProducts.forEach(prod => {
+          const item = document.createElement("div");
+          item.className = "product";
+          item.innerHTML = `
+            <img src="${prod.img || placeholderSvg()}">
+            <div class="product-info">
+              <div style="font-weight:700">${escapeHtml(prod.name)}</div>
+              <div class="small-muted">Stok: ${prod.stock} ${prod.unit}</div>
+            </div>
+          `;
+          list.appendChild(item);
+        });
+      }
+      el("backFromOutOfStockBtn").onclick = ()=> showPage("home");
+    // Aksi Produk (+)
       el("closeActionsBtn").onclick=()=>el("productActionOverlay").style.display="none";
       el("editBtn").onclick=async ()=>{
         if(!selectedProduct)return; const p=await getById("products",selectedProduct); if(!p)return;
@@ -556,7 +569,6 @@ body.theme-light #themeToggleBtn{border:1px solid rgba(0,0,0,0.08)}
     }
   })();
   </script>
-
 <!-- ADDED: theme toggle script -->
 <script>
 (function(){
