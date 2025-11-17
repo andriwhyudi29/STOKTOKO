@@ -1,26 +1,637 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0; url=SRC_TOKO.html">
-  <title>Redirecting...</title>
-  <!-- Warna tema status bar -->
-  <meta name="theme-color" content="#ff0000" />
+<meta charset="utf-8"/>
+<title>STOKTOKO FIREBASE v1.0</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+/* keep original styles (trimmed for brevity) */
+body {font-family: Arial, sans-serif; margin:0; background:#fff; color:#333;}
+header {display:flex; justify-content:space-between; align-items:center; padding:12px; background:#c62828; color:#fff;}
+header .right {position:relative;}
+header button {background:none; border:none; font-size:20px; color:#fff; cursor:pointer;}
+#cartCountTag {position:absolute; top:-6px; right:-6px; background:#fff; color:#c62828; border-radius:50%; padding:2px 6px; font-size:12px;}
+main {padding:12px; padding-bottom:70px;}
+h3 {margin:10px 0;}
+.btn {padding:10px; border:none; border-radius:6px; cursor:pointer; background:#c62828; color:#fff; font-weight:600;}
+.btn-secondary {background:#999; color:#fff;}
+.btn-outline {background:#fff; border:1px solid #c62828; color:#c62828;}
+.btn-small {font-size:12px; padding:6px; border-radius:5px;}
+.input {width:100%; padding:8px; margin:6px 0; border:1px solid #ccc; border-radius:5px;}
+.row {display:flex; gap:8px;}
+.category {border:1px solid #ddd; border-radius:6px; margin-bottom:10px;}
+.category-header {padding:10px; background:#f3f3f3; font-weight:bold; cursor:pointer;}
+.category-products {display:none; padding:8px;}
+.product {display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid #eee;}
+.product:last-child {border-bottom:none;}
+.product img {width:50px; height:50px; object-fit:cover; border-radius:4px;}
+.product-info {flex:1; margin-left:8px;}
+.product .plus {background:#c62828; color:#fff; border:none; border-radius:50%; width:28px; height:28px; cursor:pointer;}
+.overlay {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:1000;}
+.popup {background:#fff; padding:16px; border-radius:8px; width:90%; max-width:400px; max-height:90%; overflow:auto;}
+.cart-item {display:flex; align-items:center; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:8px;}
+.cart-item img {width:40px; height:40px; object-fit:cover; border-radius:4px; margin:0 8px;}
+.cart-info {flex:1;}
+.bottom-nav {position:fixed; bottom:0; left:0; width:100%; display:flex; border-top:1px solid #ccc; background:#fff;}
+.nav-item {flex:1; text-align:center; padding:10px; cursor:pointer;}
+.nav-item.active {background:#c62828; color:#fff; font-weight:bold;}
+.empty {text-align:center; color:#777; padding:20px;}
+.search-box{display:flex; gap:8px; align-items:center; margin-bottom:8px;}
+.search-box input{flex:1;}
 
-  <!-- Hubungkan ke manifest.json -->
-  <link rel="manifest" href="manifest.json">
+/* Home big button tweaks */
+@media (max-width:600px){
+  .btn{font-size:18px;padding:16px;}
+  .btn-secondary{background:#999;color:#fff;}
+}
 
-  <!-- Icon aplikasi -->
-  <link rel="icon" href="logo.png" type="image/png">
+</style>
 </head>
 <body>
-  <p>Jika tidak otomatis berpindah, klik <a href="SRC_TOKO.html">di sini</a>.</p>
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("service-worker.js")
-        .then(reg => console.log("Service Worker terdaftar:", reg))
-        .catch(err => console.log("Service Worker gagal:", err));
+<header>
+  <div class="left">📦 <span>STOKTOKO</span></div>
+  <div class="right">
+    <button id="themeToggleBtn" title="Toggle tema">🌙</button>
+    <button id="cartIconBtn" title="Keranjang">🛒</button>
+    <span id="cartCountTag">0</span>
+  </div>
+</header>
+<main>
+  <!-- HOME -->
+  <!-- HOME -->
+  <section id="homePage">
+    <div style="height:22vh"></div>
+    <div style="max-width:720px;margin:0 auto;padding:0 20px;display:flex;flex-direction:column;gap:18px;align-items:stretch;justify-content:center;">
+      <button class="btn" id="addProductBtn" style="padding:18px 20px;font-size:20px;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:10px">➕ Tambah Produk</button>
+      <button class="btn btn-secondary" id="outOfStockBtn" style="padding:18px 20px;font-size:20px;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:10px">⚠️ Barang Kosong</button>
+    </div>
+    <div style="height:50vh"></div>
+  </section>
+
+  <!-- PRODUCTS PAGE -->
+  <section id="productsPage" style="display:none">
+    <div class="search-box">
+      <input id="productSearchInput" class="input" placeholder="Cari produk..." />
+      <button class="btn btn-outline" id="clearSearchBtn">Clear</button>
+    </div>
+    <h3>📦 Produk</h3>
+    <div id="productsList"><div class="empty">Belum ada produk.</div></div>
+  </section>
+
+  <!-- CART PAGE -->
+  <section id="cartPage" style="display:none">
+    <h3>🛒 Keranjang</h3>
+    <div style="margin:8px 0"><label><input id="selectAllCart" type="checkbox"/> Pilih Semua</label></div>
+    <div id="cartList"></div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn" id="checkoutBtn" style="flex:1">Checkout → WA</button>
+      <button class="btn btn-secondary" id="deleteCheckedBtn" style="flex:1">Hapus</button>
+    </div>
+    <div style="margin-top:12px"><button class="btn btn-outline" id="backHomeBtn" style="width:100%">⬅️ Kembali</button></div>
+  </section>
+
+  <!-- ORDERS PAGE -->
+  <section id="ordersPage" style="display:none">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h3>📋 Pesanan</h3>
+      <button id="openHistoryBtn" style="background:none; border:none; font-size:20px; cursor:pointer;" title="Riwayat">📜</button>
+    </div>
+    <button class="btn" id="addOrderBtn" style="margin:10px 0;width:100%">➕ Tambah Pesanan</button>
+    <div id="orderList"></div>
+  </section>
+
+  <!-- Popups (reuse original) -->
+  <div class="overlay" id="addProductOverlay"><div class="popup">
+    <h3 id="addEditTitle">Tambah Produk</h3>
+    <input id="productIdHidden" type="hidden"/>
+    <input class="input" id="productName" placeholder="Nama Produk"/>
+    <input class="input" id="productCategory" placeholder="Kategori"/>
+    <input class="input" id="productStock" placeholder="Stok (angka)" type="number"/>
+    <select class="input" id="productUnit"><option value="PCS">PCS</option><option value="BAL">BAL</option><option value="DUS">DUS</option></select>
+    <input accept="image/*" class="input" id="productImage" type="file"/>
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="saveProductBtn" style="flex:1">💾 Simpan</button>
+      <button class="btn btn-secondary" id="cancelProductBtn" style="flex:1">Batal</button>
+    </div>
+  </div></div>
+
+  <!-- product actions -->
+  <div class="overlay" id="productActionOverlay"><div class="popup">
+    <h3>Aksi Produk</h3>
+    <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px">
+      <button class="btn btn-outline" id="editBtn">✏️ Edit Produk</button>
+      <button class="btn btn-outline" id="stockBtn">📦 Update Stok</button>
+      <button class="btn btn-outline" id="deleteBtn">🗑️ Hapus Produk</button>
+      <button class="btn btn-outline" id="orderBtn">🛒 Order Produk</button>
+      <button class="btn btn-secondary" id="closeActionsBtn">Tutup</button>
+    </div>
+  </div></div>
+
+  <div class="overlay" id="orderPromptOverlay"><div class="popup" id="orderPromptPopup">
+    <h3>Order Produk</h3>
+    <input class="input" id="orderQty" placeholder="Jumlah" type="number"/>
+    <div style="display:flex; gap:8px; margin-top:10px">
+      <button class="btn-small btn-outline" data-unit="PCS">PCS</button>
+      <button class="btn-small btn-outline" data-unit="BAL">BAL</button>
+      <button class="btn-small btn-outline" data-unit="DUS">DUS</button>
+    </div>
+    <div style="display:flex; gap:8px; margin-top:12px">
+      <button class="btn" id="confirmOrderBtn" style="flex:1">OK</button>
+      <button class="btn btn-secondary" id="cancelOrderBtn" style="flex:1">Batal</button>
+    </div>
+  </div></div>
+
+  <!-- order overlay -->
+  <div class="overlay" id="orderOverlay"><div class="popup">
+    <h3 id="orderFormTitle">Tambah Pesanan</h3>
+    <input id="orderIdHidden" type="hidden"/>
+    <input class="input" id="custNameInput" placeholder="Nama Pelanggan"/>
+    <input class="input" id="custWaInput" placeholder="Nomor WA (opsional)"/>
+    <input class="input" id="custDateInput" placeholder="Tanggal Pengambilan"/>
+    <textarea class="input" id="custOrderInput" placeholder="• Barang. jumlah" rows="4"></textarea>
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="saveOrderBtn" style="flex:1">💾 Simpan</button>
+      <button class="btn btn-secondary" id="cancelOrderBtn" style="flex:1">Batal</button>
+    </div>
+  </div></div>
+
+  <!-- order detail -->
+  <div class="overlay" id="orderDetailOverlay"><div class="popup">
+    <h3>Detail Pesanan</h3>
+    <div id="orderDetailContent" style="margin-top:8px"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn-small btn-outline" id="detailFinishBtn" style="flex:1">Selesai</button>
+      <button class="btn-small btn-outline" id="detailEditBtn" style="flex:1">Edit</button>
+      <button class="btn-small btn-secondary" id="detailDeleteBtn" style="flex:1">Batal</button>
+    </div>
+    <div style="margin-top:8px"><button class="btn" id="detailCloseBtn" style="width:100%">Tutup</button></div>
+  </div></div>
+
+  <div class="overlay" id="historyOverlay"><div class="popup">
+    <h3>📜 Riwayat Pesanan</h3>
+    <div id="historyList" style="margin-top:10px; max-height:300px; overflow:auto;"></div>
+    <div style="margin-top:12px"><button class="btn" id="closeHistoryBtn" style="width:100%">Tutup</button></div>
+  </div></div>
+
+  <div class="overlay" id="historyDetailOverlay"><div class="popup">
+    <h3>Detail Riwayat</h3>
+    <div id="historyDetailContent" style="margin-top:8px"></div>
+    <div style="margin-top:12px"><button class="btn" id="historyDetailCloseBtn" style="width:100%">Tutup</button></div>
+  </div></div>
+
+</main>
+
+<div class="bottom-nav">
+  <div class="nav-item" id="navHome">🏠 Home</div>
+  <div class="nav-item" id="navProducts">📦 Produk</div>
+  <div class="nav-item" id="navOrders">📋 Pesanan</div>
+</div>
+
+<!-- Firebase + App Script -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+import { getStorage, ref as sRef, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCxHDfMFyICR30p8Gs3JkamyGYAzGmjCI4",
+  authDomain: "stok-toko-6e555.firebaseapp.com",
+  projectId: "stok-toko-6e555",
+  storageBucket: "stok-toko-6e555.firebasestorage.app",
+  messagingSenderId: "741576964756",
+  appId: "1:741576964756:web:dd8e8583c16e019f70d281"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+window.db = db;
+
+let uid = null;
+async function initAuth(){
+  try{
+    const res = await signInAnonymously(auth);
+    uid = res.user.uid;
+    // persist cartId as uid
+    localStorage.setItem('stoktoko_uid', uid);
+  }catch(e){
+    console.error('Auth error', e);
+  }
+}
+await initAuth();
+
+// helpers
+function el(id){return document.getElementById(id);}
+function placeholderSvg(){return "data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='100%' height='100%' fill='#f3f3f3'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='#ccc' font-size='18'>No Image</text></svg>`);}
+
+// --- Firestore product functions
+async function uploadImageFile(file, productId){
+  if(!file) return "";
+  const dataUrl = await new Promise((res, rej)=>{
+    const fr = new FileReader();
+    fr.onload = ()=>res(fr.result);
+    fr.onerror = ()=>rej();
+    fr.readAsDataURL(file);
+  });
+  const path = `products/${productId||Date.now().toString(36)}.png`;
+  const ref = sRef(storage, path);
+  await uploadString(ref, dataUrl, 'data_url');
+  return await getDownloadURL(ref);
+}
+
+async function saveProductToFirestore(obj){
+  // if has id -> update; else add new
+  if(obj._id){
+    const pRef = doc(db, 'products', obj._id);
+    await updateDoc(pRef, {...obj, updatedAt: serverTimestamp()});
+    return obj._id;
+  } else {
+    const pRef = await addDoc(collection(db, 'products'), {...obj, createdAt: serverTimestamp()});
+    return pRef.id;
+  }
+}
+
+async function deleteProductFromFirestore(id){
+  await deleteDoc(doc(db, 'products', id));
+}
+
+async function getAllProducts(){
+  const qs = await getDocs(collection(db, 'products'));
+  return qs.docs.map(d=>({id:d.id, ...d.data()}));
+}
+
+// --- Cart functions (stored under collection carts, doc = uid)
+async function loadCartFromFirestore(){
+  try{
+    const cartRef = doc(db, 'carts', uid);
+    const snap = await getDoc(cartRef);
+    if(snap.exists()){
+      const d = snap.data();
+      if(d.expiresAt && d.expiresAt.toDate && d.expiresAt.toDate() < new Date()){
+        // expired
+        await setDoc(cartRef, {items:[], updatedAt: serverTimestamp()}, {merge:true});
+        return [];
+      }
+      return Array.isArray(d.items)?d.items:[];
+    } else {
+      return [];
     }
-  </script>
+  }catch(e){ console.error(e); return []; }
+}
+
+async function saveCartToFirestore(items){
+  const cartRef = doc(db, 'carts', uid);
+  const expiresDate = new Date(Date.now() + 48*3600*1000);
+  await setDoc(cartRef, {items, updatedAt: serverTimestamp(), expiresAt: Timestamp.fromDate(expiresDate)}, {merge:true});
+}
+
+// --- Orders
+async function addOrderFirestore(obj){
+  const ref = await addDoc(collection(db, 'orders'), {...obj, dateCreated: serverTimestamp()});
+  return ref.id;
+}
+async function updateOrderFirestore(id, data){
+  await updateDoc(doc(db,'orders',id), data);
+}
+async function deleteOrderFirestore(id){
+  await deleteDoc(doc(db,'orders',id));
+}
+async function getAllOrders(){
+  const qs = await getDocs(collection(db,'orders'));
+  return qs.docs.map(d=>({id:d.id,...d.data()}));
+}
+
+// UI logic adapted from original, but using Firestore
+let selectedProduct = null, orderUnit = "PCS";
+
+function setActiveNav(id){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el(id).classList.add('active');
+  // show pages
+  el('homePage').style.display = (id==='navHome')?'block':'none';
+  el('productsPage').style.display = (id==='navProducts')?'block':'none';
+  el('ordersPage').style.display = (id==='navOrders')?'block':'none';
+  el('cartPage').style.display = 'none';
+}
+
+async function initApp(){
+  // nav
+  el('navHome').onclick = ()=>{ setActiveNav('navHome'); loadCategories(); };
+  el('navProducts').onclick = ()=>{ setActiveNav('navProducts'); loadProductsPage(); };
+  el('navOrders').onclick = ()=>{ setActiveNav('navOrders'); loadOrders(); };
+
+  el('cartIconBtn').onclick = ()=>{ setActiveNav('navProducts'); showCartPage(); };
+
+  // top buttons
+  el('addProductBtn').onclick = ()=>{
+    el('productIdHidden').value = "";
+    el('productName').value = "";
+    el('productCategory').value = "";
+    el('productStock').value = "";
+    el('productUnit').value = "PCS";
+    el('productImage').value = "";
+    el('addEditTitle').textContent = "Tambah Produk";
+    el('addProductOverlay').style.display = "flex";
+  };
+  el('cancelProductBtn').onclick = ()=> el('addProductOverlay').style.display = 'none';
+
+  el('saveProductBtn').onclick = async ()=>{
+    const name = el('productName').value.trim();
+    const cat = el('productCategory').value.trim();
+    const stock = Number(el('productStock').value||0);
+    const unit = el('productUnit').value||'PCS';
+    const file = el('productImage').files[0];
+    if(!name||!cat){ alert('Nama & kategori wajib.'); return; }
+    const obj = {name, category:cat, stock, unit};
+    // if edit
+    const pid = el('productIdHidden').value;
+    if(pid){
+      obj._id = pid;
+      if(file){ // upload then update
+        const url = await uploadImageFile(file, pid);
+        obj.img = url;
+      }
+      await saveProductToFirestore(obj);
+    } else {
+      // create then upload image if any
+      const id = await saveProductToFirestore(obj);
+      if(file){
+        const url = await uploadImageFile(file, id);
+        await updateDoc(doc(db,'products',id), {img:url});
+      }
+    }
+    el('addProductOverlay').style.display = 'none';
+    await loadCategories();
+    if(el('navProducts').classList.contains('active')) await loadProductsPage();
+  };
+
+  el('outOfStockBtn').onclick = ()=>{ setActiveNav('navHome'); loadOutOfStockProducts(); };
+
+  // product actions
+  el('closeActionsBtn').onclick = ()=> el('productActionOverlay').style.display = 'none';
+  el('editBtn').onclick = async ()=>{
+    if(!selectedProduct) return;
+    const snap = await getDoc(doc(db,'products',selectedProduct));
+    if(!snap.exists()) return alert('Produk tidak ditemukan');
+    const p = snap.data();
+    el('productIdHidden').value = selectedProduct;
+    el('productName').value = p.name||'';
+    el('productCategory').value = p.category||'';
+    el('productStock').value = p.stock||0;
+    el('productUnit').value = p.unit||'PCS';
+    el('productActionOverlay').style.display = 'none'; el('addProductOverlay').style.display = 'flex'; el('addEditTitle').textContent='Edit Produk';
+  };
+  el('stockBtn').onclick = async ()=>{
+    if(!selectedProduct) return;
+    const snap = await getDoc(doc(db,'products',selectedProduct));
+    if(!snap.exists()) return;
+    const p = snap.data();
+    const val = prompt('Stok baru:', p.stock||0); if(val===null) return;
+    await updateDoc(doc(db,'products',selectedProduct), {stock: Number(val)});
+    el('productActionOverlay').style.display = 'none'; await loadCategories(); if(el('navProducts').classList.contains('active')) await loadProductsPage();
+  };
+  el('deleteBtn').onclick = async ()=>{
+    if(!selectedProduct) return;
+    if(!confirm('Hapus produk ini?')) return;
+    await deleteProductFromFirestore(selectedProduct);
+    el('productActionOverlay').style.display = 'none'; await loadCategories(); if(el('navProducts').classList.contains('active')) await loadProductsPage();
+  };
+  el('orderBtn').onclick = ()=>{ orderUnit = 'PCS'; el('orderQty').value=''; el('productActionOverlay').style.display='none'; el('orderPromptOverlay').style.display='flex'; };
+
+  // order prompt
+  el('cancelOrderBtn').onclick = ()=> el('orderPromptOverlay').style.display='none';
+  document.querySelectorAll('#orderPromptPopup [data-unit]').forEach(btn=>{ btn.onclick=()=>{ orderUnit=btn.dataset.unit; document.querySelectorAll('#orderPromptPopup [data-unit]').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); };});
+  el('confirmOrderBtn').onclick = async ()=>{
+    const qty = Number(el('orderQty').value||0); if(!qty) return alert('Isi jumlah');
+    const snap = await getDoc(doc(db,'products',selectedProduct));
+    if(!snap.exists()) return alert('Produk hilang');
+    const prod = snap.data();
+    const item = {productId: selectedProduct, name: prod.name, img: prod.img||'', qty, unit: orderUnit};
+    // add to cart
+    const items = await loadCartFromFirestore();
+    const idx = items.findIndex(it => it.productId===item.productId && it.unit===item.unit);
+    if(idx>=0) items[idx].qty = Number(items[idx].qty)+Number(item.qty); else items.push(item);
+    await saveCartToFirestore(items);
+    el('orderPromptOverlay').style.display='none'; await renderCart();
+  };
+
+  // cart actions
+  el('selectAllCart').onchange = ()=> document.querySelectorAll('.cart-check').forEach(c=>c.checked = el('selectAllCart').checked);
+  el('deleteCheckedBtn').onclick = async ()=>{
+    const ids = [...document.querySelectorAll('.cart-check:checked')].map(c=>Number(c.dataset.idx));
+    let items = await loadCartFromFirestore();
+    items = items.filter((_,i)=>!ids.includes(i));
+    await saveCartToFirestore(items); await renderCart();
+  };
+  el('checkoutBtn').onclick = async ()=>{
+    const checks = [...document.querySelectorAll('.cart-check:checked')].map(c=>Number(c.dataset.idx));
+    if(!checks.length) return alert('Pilih item dulu.');
+    const items = await loadCartFromFirestore();
+    const pick = items.filter((_,i)=>checks.includes(i));
+    let text = "ORDER :\n";
+    pick.forEach(i=> text += `• ${i.name}   ${i.qty} ${i.unit}\n`);
+    window.open("https://wa.me/?text="+encodeURIComponent(text), "_blank");
+  };
+  el('backHomeBtn').onclick = ()=> setActiveNav('navHome');
+
+  // orders UI
+  el('addOrderBtn').onclick = ()=>{ el('orderIdHidden').value=''; el('custNameInput').value=''; el('custWaInput').value=''; el('custDateInput').value=''; el('custOrderInput').value=''; el('orderFormTitle').textContent='Tambah Pesanan'; el('orderOverlay').style.display='flex'; };
+  el('cancelOrderBtn').onclick = ()=> el('orderOverlay').style.display='none';
+  el('saveOrderBtn').onclick = async ()=>{
+    const id = el('orderIdHidden').value; const name = el('custNameInput').value.trim(); const wa = el('custWaInput').value.trim(); const date = el('custDateInput').value.trim(); const orders = el('custOrderInput').value.trim();
+    if(!name||!orders) return alert('Nama & pesanan wajib');
+    if(id){ await updateOrderFirestore(id, {name, wa, date, orders}); el('orderOverlay').style.display='none'; await loadOrders(); }
+    else { await addOrderFirestore({name, wa, date, orders, status:'pending'}); el('orderOverlay').style.display='none'; await loadOrders(); }
+  };
+
+  el('openHistoryBtn').onclick = ()=>{ loadHistory(); el('historyOverlay').style.display='flex'; };
+  el('closeHistoryBtn').onclick = ()=> el('historyOverlay').style.display='none';
+  el('historyDetailCloseBtn').onclick = ()=> el('historyDetailOverlay').style.display='none';
+
+  el('detailFinishBtn').onclick = async function(){ const id = Number(this.dataset.id); if(!confirm('Tandai pesanan ini sebagai selesai?')) return; const snap = await getDoc(doc(db,'orders',id)); if(!snap.exists()) return; const rec = snap.data(); await updateOrderFirestore(id, {status:'done', dateDone: new Date().toLocaleString()}); el('orderDetailOverlay').style.display='none'; await loadOrders(); };
+  el('detailEditBtn').onclick = async function(){ const id = Number(this.dataset.id); const snap = await getDoc(doc(db,'orders',id)); if(!snap.exists()) return alert('Data tidak ditemukan'); const o = snap.data(); el('orderIdHidden').value = id; el('custNameInput').value = o.name||''; el('custWaInput').value = o.wa||''; el('custDateInput').value = o.date||''; el('custOrderInput').value = o.orders||''; el('orderFormTitle').textContent = 'Edit Pesanan'; el('orderDetailOverlay').style.display='none'; el('orderOverlay').style.display='flex'; };
+  el('detailDeleteBtn').onclick = async function(){ const id = Number(this.dataset.id); if(!confirm('Hapus pesanan ini?')) return; await deleteOrderFirestore(id); el('orderDetailOverlay').style.display='none'; await loadOrders(); };
+  el('detailCloseBtn').onclick = ()=> el('orderDetailOverlay').style.display='none';
+
+  // search
+  el('productSearchInput').addEventListener('input', async (e)=>{
+    const q = e.target.value.trim().toLowerCase();
+    if(!q){ await loadProductsPage(); return; }
+    const all = await getAllProducts();
+    const matched = all.filter(p=> (p.name||'').toLowerCase().includes(q));
+    renderProductSearchResults(matched);
+  });
+  el('clearSearchBtn').onclick = ()=>{ el('productSearchInput').value=''; loadProductsPage(); };
+
+  // init loads
+  await loadCategories();
+  await renderCart();
+  await loadOrders();
+
+} // end initApp
+
+// RENDER / LOAD FUNCTIONS
+async function loadCategories(){
+  const wrap = el('categoriesList'); wrap.innerHTML = '';
+  const all = await getAllProducts();
+  const groups = {};
+  all.forEach(p=>{ if(!groups[p.category]) groups[p.category]=[]; groups[p.category].push(p); });
+  const cats = Object.keys(groups).sort();
+  if(!cats.length){ wrap.innerHTML = "<div class='empty'>Belum ada produk.</div>"; return; }
+  cats.forEach(cat=>{
+    const c = document.createElement('div'); c.className='category';
+    c.innerHTML = `<div class="category-header">${escapeHtml(cat)} <span class="tag">${groups[cat].length} item</span></div>`;
+    const pDiv = document.createElement('div'); pDiv.className='category-products';
+    groups[cat].forEach(prod=>{
+      const it = document.createElement('div'); it.className='product';
+      it.innerHTML = `<img src="${prod.img||placeholderSvg()}"><div class="product-info"><div style="font-weight:700">${escapeHtml(prod.name)}</div><div class="small-muted">Stok: ${escapeHtml(String(prod.stock||0))} ${escapeHtml(prod.unit||'PCS')}</div></div><button class="plus" data-id="${prod.id}">+</button>`;
+      it.querySelector('.plus').onclick = ()=>{ selectedProduct = prod.id; el('productActionOverlay').style.display='flex'; };
+      pDiv.appendChild(it);
+    });
+    c.querySelector('.category-header').onclick = ()=>{ pDiv.style.display = (pDiv.style.display==='block')?'none':'block'; };
+    c.appendChild(pDiv); wrap.appendChild(c);
+  });
+}
+
+async function loadProductsPage(){
+  const list = el('productsList'); list.innerHTML = '';
+  const all = await getAllProducts();
+  if(!all.length){ list.innerHTML = "<div class='empty'>Belum ada produk.</div>"; return; }
+  all.sort((a,b)=> (a.category||'').localeCompare(b.category||''));
+  all.forEach(prod=>{
+    const it = document.createElement('div'); it.className='product';
+    it.innerHTML = `<img src="${prod.img||placeholderSvg()}"><div class="product-info"><div style="font-weight:700">${escapeHtml(prod.name)}</div><div class="small-muted">${escapeHtml(prod.category||'-')} • Stok: ${escapeHtml(String(prod.stock||0))} ${escapeHtml(prod.unit||'PCS')}</div></div><button class="plus" data-id="${prod.id}">+</button>`;
+    it.querySelector('.plus').onclick = ()=>{ selectedProduct = prod.id; el('productActionOverlay').style.display='flex'; };
+    list.appendChild(it);
+  });
+}
+
+function renderProductSearchResults(list){
+  const wrap = el('productsList'); wrap.innerHTML = '';
+  if(!list.length){ wrap.innerHTML = "<div class='empty'>Produk tidak ditemukan.</div>"; return; }
+  list.forEach(prod=>{
+    const it = document.createElement('div'); it.className='product';
+    it.innerHTML = `<img src="${prod.img||placeholderSvg()}"><div class="product-info"><div style="font-weight:700">${escapeHtml(prod.name)}</div><div class="small-muted">${escapeHtml(prod.category||'-')} • Stok: ${escapeHtml(String(prod.stock||0))} ${escapeHtml(prod.unit||'PCS')}</div></div><button class="plus" data-id="${prod.id}">+</button>`;
+    it.querySelector('.plus').onclick = ()=>{ selectedProduct = prod.id; el('productActionOverlay').style.display='flex'; };
+    wrap.appendChild(it);
+  });
+}
+
+async function loadOutOfStockProducts(){
+  const list = el('productsList'); list.innerHTML = '';
+  const all = await getAllProducts();
+  const emptyProducts = all.filter(p=> (p.stock||0) <= 0);
+  if(!emptyProducts.length){ list.innerHTML = "<div class='empty'>Tidak ada produk kosong.</div>"; return; }
+  emptyProducts.forEach(prod=>{
+    const item = document.createElement('div'); item.className='product';
+    item.innerHTML = `<img src="${prod.img||placeholderSvg()}"><div class="product-info"><div style="font-weight:700">${escapeHtml(prod.name)}</div><div class="small-muted">Stok: ${escapeHtml(String(prod.stock||0))} ${escapeHtml(prod.unit||'PCS')}</div></div>`;
+    list.appendChild(item);
+  });
+}
+
+// CART render
+async function renderCart(){
+  const list = el('cartList'); list.innerHTML = '';
+  const items = await loadCartFromFirestore();
+  el('cartCountTag').textContent = items.length;
+  if(!items.length){ list.innerHTML = "<div class='empty'>Keranjang kosong.</div>"; return; }
+  items.forEach((it, idx)=>{
+    const d = document.createElement('div'); d.className='cart-item';
+    d.innerHTML = `<input type="checkbox" class="cart-check" data-idx="${idx}"><img src="${it.img||placeholderSvg()}"><div class="cart-info"><div style="font-weight:700">${escapeHtml(it.name)}</div><div class="small-muted">${escapeHtml(String(it.qty))} ${escapeHtml(it.unit)}</div></div>`;
+    list.appendChild(d);
+  });
+}
+
+// ORDERS functions
+async function loadOrders(){
+  const list = el('orderList'); list.innerHTML = '';
+  const all = await getAllOrders();
+  const pending = all.filter(o=> o.status !== 'done');
+  if(!pending.length){ list.innerHTML = "<div class='empty'>Belum ada pesanan.</div>"; return; }
+  pending.reverse().forEach(o=>{
+    const d = document.createElement('div'); d.className='category';
+    d.innerHTML = `<div class="category-header">${escapeHtml(o.name)} <span class="tag">${escapeHtml(o.date||"-")}</span></div>`;
+    d.onclick = ()=> openOrderDetail(o.id);
+    list.appendChild(d);
+  });
+}
+
+async function openOrderDetail(id){
+  const snap = await getDoc(doc(db,'orders',id));
+  if(!snap.exists()) return alert('Pesanan tidak ditemukan');
+  const o = snap.data();
+  const content = el('orderDetailContent');
+  content.innerHTML = `<b>${escapeHtml(o.name)}</b><br>WA: ${escapeHtml(o.wa||'-')}<br>Ambil: ${escapeHtml(o.date||'-')}<br><pre style="margin-top:8px">${escapeHtml(o.orders)}</pre>`;
+  el('detailFinishBtn').dataset.id = id;
+  el('detailEditBtn').dataset.id = id;
+  el('detailDeleteBtn').dataset.id = id;
+  el('orderDetailOverlay').style.display = 'flex';
+}
+
+async function loadHistory(){
+  const box = el('historyList'); box.innerHTML = '';
+  const all = await getAllOrders();
+  const done = all.filter(o=> o.status === 'done').reverse();
+  if(!done.length){ box.innerHTML = "<div class='empty'>Belum ada riwayat.</div>"; return; }
+  done.forEach(o=>{
+    const d = document.createElement('div'); d.className='category';
+    d.innerHTML = `<div class="category-header">${escapeHtml(o.name)} <span class="tag">${escapeHtml(o.date||"-")}</span></div>`;
+    d.onclick = ()=> openHistoryDetail(o);
+    box.appendChild(d);
+  });
+}
+
+function openHistoryDetail(o){
+  const box = el('historyDetailContent');
+  box.innerHTML = `<b>${escapeHtml(o.name)}</b><br>WA: ${escapeHtml(o.wa||'-')}<br>Ambil: ${escapeHtml(o.date||'-')}<br><small>Selesai: ${escapeHtml(o.dateDone||'-')}</small><pre style="margin-top:8px">${escapeHtml(o.orders)}</pre>`;
+  el('historyDetailOverlay').style.display = 'flex';
+}
+
+// utility
+function escapeHtml(s){ if(!s&&s!==0) return ''; return String(s).replace(/[&<>"']/g, m=> ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m])); }
+
+// show cart page helper
+async function showCartPage(){
+  document.querySelectorAll('section').forEach(sec=>sec.style.display='none');
+  el('cartPage').style.display='block';
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el('navProducts').classList.add('active');
+  await renderCart();
+}
+
+// initial
+setActiveNav('navHome');
+await initApp();
+
+// expose some global funcs for other handlers
+window.loadCategories = loadCategories;
+window.loadProductsPage = loadProductsPage;
+window.loadOrders = loadOrders;
+window.renderCart = renderCart;
+window.loadCartFromFirestore = loadCartFromFirestore;
+window.saveCartToFirestore = saveCartToFirestore;
+
+</script>
+
+<!-- theme toggle simple -->
+<script>
+(function(){
+  try{
+    const btn = document.getElementById('themeToggleBtn');
+    const body = document.body;
+    const saved = localStorage.getItem('stoktoko_theme');
+    if(saved === 'light'){ body.classList.remove('theme-dark'); body.classList.add('theme-light'); btn.textContent = '☀️'; } else { body.classList.remove('theme-light'); body.classList.add('theme-dark'); btn.textContent = '🌙'; }
+    btn.addEventListener('click', function(){
+      if(body.classList.contains('theme-light')){
+        body.classList.remove('theme-light'); body.classList.add('theme-dark'); btn.textContent = '🌙'; localStorage.setItem('stoktoko_theme','dark');
+      } else {
+        body.classList.remove('theme-dark'); body.classList.add('theme-light'); btn.textContent = '☀️'; localStorage.setItem('stoktoko_theme','light');
+      }
+    });
+  }catch(e){ console.warn('theme toggle init error', e); }
+})();
+</script>
 </body>
 </html>
